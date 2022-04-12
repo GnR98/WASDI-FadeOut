@@ -2,8 +2,14 @@
 
 Fill the document with the authors and the contact references
 
-Matteo Aicardi
+## Matteo Aicardi
 
  Email: matteoaic@gmail.com
 
  Github: M-AIC
+ 
+ ## Roberto Gnisci
+ 
+ Email: gniscir@gmail.com
+ 
+ Github: GnR98
