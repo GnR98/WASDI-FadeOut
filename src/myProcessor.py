@@ -9,6 +9,11 @@ import numpy
 def run():
     # STEP 1: Read "real" parameters
     sBBox = wasdi.getParameter("BBOX")
+    sWorkflow= wasdi.getParameter("WORKFLOW","LISTSinglePreproc")
+    if sWorkflow is None:
+        wasdi.wasdiLog("Workflow not set. Exit")
+        wasdi.updateStatus("ERROR", 0)
+        return
     # L2
     # sImageType = wasdi.getParameter("IMAGETYPE", "S2MSI2A")
     # Check the Bounding Box: is needed
@@ -52,13 +57,6 @@ def run():
     fLonE = float(asBBox[3])
 
 
-    # Check the cloud coverage
-    # sCloudCoverage = None
-    # if sMaxCloud is not None:
-    #     sCloudCoverage = "[0 TO " + sMaxCloud + "]"
-    #     wasdi.wasdiLog("Cloud Coverage " + sCloudCoverage)
-    # else:
-    #     wasdi.wasdiLog("Cloud Coverage not set")
 
     # STEP 2: Search EO Images
     #"S1", sStartDate, sEndDate, fLatN, fLonW, fLatS, fLonE, sImageType, None, None, sCloudCoverage, sProvider
@@ -71,29 +69,82 @@ def run():
         wasdi.wasdiLog("Image Name WITHOUT Extension:" + oImage['title'])
 
     #STEP 3: Import product on WASDI
-    sImportWithDict = wasdi.importAndPreprocess(aoImages,"FirstWorkflow","_proc.tif",sProvider=sProvider)
 
-    # STEP 4: From the S2 image create a 8-bit RGB GeoTiff
+    sImportWithDict = wasdi.importAndPreprocess(aoImages,sWorkflow,"_proc.tif",sProvider=sProvider)
+
+
+
+    # STEP 4
     # Get again the list of images in the workspace:
-    #asAvailableImages = wasdi.getProductsByActiveWorkspace()
+    asAvailableImages = wasdi.getProductsByActiveWorkspace()
     # Check if we have at least one image
-    # if len(asAvailableImages) <= 0:
-    #     # Nothing found
-    #     wasdi.wasdiLog("No images available, nothing to do.")
-    #     wasdi.updateStatus("DONE", 100)
-    #     return
-    # # Take the first image
-    # sImageToProcess = asAvailableImages[0]
+    if len(asAvailableImages) <= 0:
+         # Nothing found
+        wasdi.wasdiLog("No images available, nothing to do.")
+        wasdi.updateStatus("DONE", 100)
+        return
+    # # Take only the Sentinel 1 files
+    for i in asAvailableImages:
+        if "_proc.tif" not in i or "S1A" not in i:
+            asAvailableImages.remove(i)
+
+
+
     # # Get the local path of the image: this is one of the key-feature of WASDI
     # # The system checks if the image is available locally and, if it is not, it will download it
-    # sLocalImagePath = wasdi.getPath(sImageToProcess)
-    # sStatus = wasdi.executeWorkflow(sImageToProcess,['S1Processed'],"FirstWorkflow")
-    # if sStatus == 'DONE':
-    #     wasdi.wasdiLog('The product is now in your workspace, look at it on the website')
-    #
-    # wasdi.wasdiLog('It\'s over!')
+    for sImageToExtract in asAvailableImages:
+        sLocalImagePath = wasdi.getpath(sImageToExtract)
+        sDEFLATEFile = extractBands(sImageToExtract,fLatN,fLonW,fLatS,fLonE)
+        wasdi.wasdiLog("Generated RGB Tiff: " + sTiffFile)
+        sOutputFile = sDEFLATEFile.replace(".DEFLATE", "_rgb.DEFLATE")
+        #stretchBandValues(sTiffFile, sOutputFile)
+        # Delete intermediate Tiff File: NOTE this has not been added to WASDI
+        # so there is the need to clean only the physical file
+        try:
+            os.remove(wasdi.getPath(sDEFLATEFile))
+        except:
+            wasdi.wasdiLog("Error removing " + sDEFLATEFile)
+        # Add the real output to the WASDI Workspace
+        # NOTE: here starts the opposite path: when running locally, WASDI will upload the file to the cloud
+        wasdi.addFileToWASDI(sOutputFile)
 
 
+
+def extractBands(sFile,fLatN, fLonW, fLatS, fLonE):
+  try:
+      sOutputVrtFile = sFile.replace(".zip", ".vrt")
+      sOutputTiffFile = sFile.replace(".zip", ".tif")
+      sOutputDeflateFile = sFile.replace(".zip", ".DEFLATE")
+      # Get the Path
+      sLocalFilePath = wasdi.getPath(sFile)
+      sOutputVrtPath = wasdi.getPath(sOutputVrtFile)
+      sOutputTiffPath = wasdi.getPath(sOutputTiffFile)
+      sOutputDeflatePath = wasdi.getPath(sOutputDeflateFile)
+      asOrderedZipBands = []
+
+      #Band Names for S2 L2
+      asBandsJp2 = ['Sigma0_VV_db.jp2']
+      with zipfile.ZipFile(sLocalFilePath, 'r') as sZipFiles:
+          asZipNameList = sZipFiles.namelist()
+          asBandsS1 = [name for name in asZipNameList for band in asBandsJp2 if band in name]
+          asBandsZip = ['/vsizip/' + sLocalFilePath + '/' + band for band in asBandsS1]
+          asOrderedZipBands = []
+          for sBand in ['Sigma0_VV_db']:
+              for sZipBand in asBandsZip:
+                  if sBand in sZipBand:
+                      asOrderedZipBands.append(sZipBand)
+                      break
+      gdal.BuildVRT(sOutputVrtPath, asOrderedZipBands, separate=True)
+      # , options="-tr " + sResolution + " " + sResolution
+      #gdal.Translate(sOutputTiffPath, sOutputVrtPath)
+      wasdi.multiSubset(sOutputVrtPath,sOutputDeflateFile,adLatN=fLatN,adLonW=fLonW,adLatS=fLatS,adLonE=fLonE)
+      gdal.Translate(sOutputTiffPath,sOutputDeflatePath)
+      #os.remove(sOutputVrtPath)
+      os.remove(sOutputDeflatePath)
+      return sOutputDeflateFile
+  except Exception as oEx:
+      wasdi.wasdiLog(f'extractBands EXCEPTION: {repr(oEx)}')
+  return ""
 
 def days_between(d1, d2):
     d1 = datetime.strptime(d1, "%Y-%m-%d")
