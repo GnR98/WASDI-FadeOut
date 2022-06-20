@@ -58,19 +58,19 @@ def run():
 
 
 
-    # STEP 2: Search EO Images
-    #"S1", sStartDate, sEndDate, fLatN, fLonW, fLatS, fLonE, sImageType, None, None, sCloudCoverage, sProvider
-    aoImages = wasdi.searchEOImages(sPlatform="S1", sDateFrom=sStartDate, sDateTo=sEndDate,
-                   fULLat=fLatN, fULLon=fLonW, fLRLat=fLatS, fLRLon=fLonE,
-                   sProductType="GRD", iOrbitNumber=None,
-                   sSensorOperationalMode=None, sCloudCoverage=None,
-                   sProvider=sProvider, oBoundingBox=None, aoParams=None)
-    for oImage in aoImages:
-        wasdi.wasdiLog("Image Name WITHOUT Extension:" + oImage['title'])
-
-    #STEP 3: Import product on WASDI
-
-    sImportWithDict = wasdi.importAndPreprocess(aoImages,sWorkflow,"_proc.tif",sProvider=sProvider)
+    # # STEP 2: Search EO Images
+    # #"S1", sStartDate, sEndDate, fLatN, fLonW, fLatS, fLonE, sImageType, None, None, sCloudCoverage, sProvider
+    # aoImages = wasdi.searchEOImages(sPlatform="S1", sDateFrom=sStartDate, sDateTo=sEndDate,
+    #                fULLat=fLatN, fULLon=fLonW, fLRLat=fLatS, fLRLon=fLonE,
+    #                sProductType="GRD", iOrbitNumber=None,
+    #                sSensorOperationalMode=None, sCloudCoverage=None,
+    #                sProvider=sProvider, oBoundingBox=None, aoParams=None)
+    # for oImage in aoImages:
+    #     wasdi.wasdiLog("Image Name WITHOUT Extension:" + oImage['title'])
+    #
+    # #STEP 3: Import product on WASDI
+    #
+    # sImportWithDict = wasdi.importAndPreprocess(aoImages,sWorkflow,"_proc.tif",sProvider=sProvider)
 
 
 
@@ -84,26 +84,27 @@ def run():
         wasdi.updateStatus("DONE", 100)
         return
     # # Take only the Sentinel 1 files
+    asImagesToExtract=[]
     for i in asAvailableImages:
-        if "_proc.tif" not in i or "S1A" not in i:
-            asAvailableImages.remove(i)
+        if "_proc.tif" in i and ("S1A" in i or "S1B" in i):
+            asImagesToExtract.append(i)
 
 
 
-    # # Get the local path of the image: this is one of the key-feature of WASDI
-    # # The system checks if the image is available locally and, if it is not, it will download it
-    for sImageToExtract in asAvailableImages:
-        sLocalImagePath = wasdi.getpath(sImageToExtract)
-        sDEFLATEFile = extractBands(sImageToExtract,fLatN,fLonW,fLatS,fLonE)
-        wasdi.wasdiLog("Generated RGB Tiff: " + sTiffFile)
-        sOutputFile = sDEFLATEFile.replace(".DEFLATE", "_rgb.DEFLATE")
+     # Get the local path of the image: this is one of the key-feature of WASDI
+     # The system checks if the image is available locally and, if it is not, it will download it
+    for sImageToExtract in asImagesToExtract:
+        sLocalImagePath = wasdi.getPath(sImageToExtract)
+        sTiffDeflateFile = extractBands(sImageToExtract,fLatN,fLonW,fLatS,fLonE)
+        wasdi.wasdiLog("Generated RGB Tiff: " + sTiffDeflateFile)
+        sOutputFile = sTiffDeflateFile.replace(".tiff", "_deflate.tiff")
         #stretchBandValues(sTiffFile, sOutputFile)
         # Delete intermediate Tiff File: NOTE this has not been added to WASDI
         # so there is the need to clean only the physical file
         try:
-            os.remove(wasdi.getPath(sDEFLATEFile))
+            os.remove(wasdi.getPath(sTiffDeflateFile))
         except:
-            wasdi.wasdiLog("Error removing " + sDEFLATEFile)
+            wasdi.wasdiLog("Error removing " + sTiffDeflateFile)
         # Add the real output to the WASDI Workspace
         # NOTE: here starts the opposite path: when running locally, WASDI will upload the file to the cloud
         wasdi.addFileToWASDI(sOutputFile)
@@ -112,36 +113,36 @@ def run():
 
 def extractBands(sFile,fLatN, fLonW, fLatS, fLonE):
   try:
-      sOutputVrtFile = sFile.replace(".zip", ".vrt")
-      sOutputTiffFile = sFile.replace(".zip", ".tif")
-      sOutputDeflateFile = sFile.replace(".zip", ".DEFLATE")
+      sOutputVrtFile = sFile.replace(".tif", ".vrt")
+      sOutputTiffFile = sFile
       # Get the Path
       sLocalFilePath = wasdi.getPath(sFile)
       sOutputVrtPath = wasdi.getPath(sOutputVrtFile)
       sOutputTiffPath = wasdi.getPath(sOutputTiffFile)
-      sOutputDeflatePath = wasdi.getPath(sOutputDeflateFile)
       asOrderedZipBands = []
 
       #Band Names for S2 L2
       asBandsJp2 = ['Sigma0_VV_db.jp2']
-      with zipfile.ZipFile(sLocalFilePath, 'r') as sZipFiles:
-          asZipNameList = sZipFiles.namelist()
-          asBandsS1 = [name for name in asZipNameList for band in asBandsJp2 if band in name]
-          asBandsZip = ['/vsizip/' + sLocalFilePath + '/' + band for band in asBandsS1]
-          asOrderedZipBands = []
-          for sBand in ['Sigma0_VV_db']:
-              for sZipBand in asBandsZip:
-                  if sBand in sZipBand:
-                      asOrderedZipBands.append(sZipBand)
-                      break
-      gdal.BuildVRT(sOutputVrtPath, asOrderedZipBands, separate=True)
+      image=gdal.Open(sLocalFilePath)
+      band=image.GetRasterBand(1)
+      # with zipfile.ZipFile(sLocalFilePath, 'r') as sZipFiles:
+      #     asZipNameList = sZipFiles.namelist()
+      #     asBandsS1 = [name for name in asZipNameList for band in asBandsJp2 if band in name]
+      #     asBandsZip = ['/vsizip/' + sLocalFilePath + '/' + band for band in asBandsS1]
+      #     asOrderedZipBands = []
+      #     for sBand in ['Sigma0_VV_db']:
+      #         for sZipBand in asBandsZip:
+      #             if sBand in sZipBand:
+      #                 asOrderedZipBands.append(sZipBand)
+      #                 break
+      #gdal.BuildVRT(sOutputVrtPath, asOrderedZipBands, separate=True)
       # , options="-tr " + sResolution + " " + sResolution
-      #gdal.Translate(sOutputTiffPath, sOutputVrtPath)
-      wasdi.multiSubset(sOutputVrtPath,sOutputDeflateFile,adLatN=fLatN,adLonW=fLonW,adLatS=fLatS,adLonE=fLonE)
-      gdal.Translate(sOutputTiffPath,sOutputDeflatePath)
-      #os.remove(sOutputVrtPath)
-      os.remove(sOutputDeflatePath)
-      return sOutputDeflateFile
+      translateoption=gdal.TranslateOptions(format="GTiff", options=['COMPRESS=DEFLATE'])
+      gdal.Translate(sOutputTiffPath, image, options=translateoption)
+      wasdi.mosaic()
+      wasdi.multiSubset()
+      os.remove(sOutputVrtPath)
+      return sOutputTiffFile
   except Exception as oEx:
       wasdi.wasdiLog(f'extractBands EXCEPTION: {repr(oEx)}')
   return ""
@@ -152,5 +153,5 @@ def days_between(d1, d2):
     return (d2 - d1).days
 
 if __name__ == '__main__':
-    wasdi.init("./config.json")
+    wasdi.init("config.json")
     run()
