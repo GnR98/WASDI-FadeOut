@@ -5,6 +5,7 @@ import zipfile
 import os
 from osgeo import gdal
 import numpy
+from ost import Sentinel1Scene
 
 def run():
     # STEP 1: Read "real" parameters
