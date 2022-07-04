@@ -20,7 +20,7 @@ def process (sImageToProcess):
     home = Path.home()
 
     # create a processing directory
-    output_dir = home /".wasdi"/"matteoaic@gmail.com"/"28f65c36-96a8-4357-89da-9b030b1f48f0"
+    output_dir = home /".wasdi"/"gniscir@gmail.com"/"2590d683-b176-422d-9b93-4d5a6b960b10"
     output_dir.mkdir(parents=True, exist_ok=True)
     print(str(output_dir))
     scene_id=os.path.splitext(sImageToProcess)[0]
@@ -127,12 +127,15 @@ def process (sImageToProcess):
         "-----------------------------------------------------------------------------------------------------------"
     )
 
-    s1.create_ard(infile=output_dir/sImageToProcess, out_dir=output_dir, overwrite=True)
+    if(not os.path.exists(output_dir / f"{s1.start_date}.tif")):
+        s1.create_ard(infile=output_dir/sImageToProcess, out_dir=output_dir, overwrite=True)
 
-    print(" The path to our newly created ARD product can be obtained the following way:")
-    s1.ard_dimap
+        print(" The path to our newly created ARD product can be obtained the following way:")
+        s1.ard_dimap
 
-    s1.create_rgb(outfile=output_dir/sImageToProcess / f"{s1.start_date}.tif")
+        s1.create_rgb(outfile=output_dir / f"{s1.start_date}.tif")
 
-    print(" The path to our newly created RGB product can be obtained the following way:")
-    s1.ard_rgb
+        print(" The path to our newly created RGB product can be obtained the following way:")
+        return str(s1.ard_rgb)
+    else:
+        return str(f"{s1.start_date}.tif")
