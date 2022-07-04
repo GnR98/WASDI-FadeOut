@@ -56,35 +56,43 @@ def run():
 
 
 
-    # STEP 2: Search EO Images
-    #"S1", sStartDate, sEndDate, fLatN, fLonW, fLatS, fLonE, sImageType, None, None, sCloudCoverage, sProvider
-    aoImages = wasdi.searchEOImages(sPlatform="S1", sDateFrom=sStartDate, sDateTo=sEndDate,
-                   fULLat=fLatN, fULLon=fLonW, fLRLat=fLatS, fLRLon=fLonE,
-                   sProductType="GRD", iOrbitNumber=None,
-                   sSensorOperationalMode=None, sCloudCoverage=None,
-                   sProvider=sProvider, oBoundingBox=None, aoParams=None)
-    asAvailableImages=[]
-    for oImage in aoImages:
-        wasdi.wasdiLog("Image Name WITHOUT Extension:" + oImage['title'])
-        asAvailableImages.append(oImage['fileName'])
+    # # STEP 2: Search EO Images
+    # #"S1", sStartDate, sEndDate, fLatN, fLonW, fLatS, fLonE, sImageType, None, None, sCloudCoverage, sProvider
+    # aoImages = wasdi.searchEOImages(sPlatform="S1", sDateFrom=sStartDate, sDateTo=sEndDate,
+    #                fULLat=fLatN, fULLon=fLonW, fLRLat=fLatS, fLRLon=fLonE,
+    #                sProductType="GRD", iOrbitNumber=None,
+    #                sSensorOperationalMode=None, sCloudCoverage=None,
+    #                sProvider=sProvider, oBoundingBox=None, aoParams=None)
+    # asAvailableImages=[]
+    # for oImage in aoImages:
+    #     wasdi.wasdiLog("Image Name WITHOUT Extension:" + oImage['title'])
+    #     asAvailableImages.append(oImage['fileName'])
+    #
+    # #STEP 3: Import product on WASDI
+    #
+    # sImportWithDict = wasdi.importProductList(aoImages,sProvider)
+    #
+    # # STEP 4
+    # # Get again the list of images in the workspace:
+    #
+    # # Check if we have at least one image
+    # if len(asAvailableImages) <= 0:
+    #      # Nothing found
+    #     wasdi.wasdiLog("No images available, nothing to do.")
+    #     wasdi.updateStatus("DONE", 100)
+    #     return
+    # imageTiff=[]
+    # # Take only the Sentinel 1 files
+    # for sImageToProcess in asAvailableImages:
+    #     sLocalImagePath = wasdi.getPath(sImageToProcess)
+    #     temp = OSTProcess.process(sImageToProcess)
+    #     imageTiff.append(temp)
+    #     wasdi.addFileToWASDI(temp)
 
-    #STEP 3: Import product on WASDI
+    wasdi.mosaic(imageTiff, "mosaicImg")
+    SubsetImg=[]
+    wasdi.multiSubset(sInputFile="mosaicImg",asOutputFiles=SubsetImg, adLatN=fLatN, adLonW=fLonW, adLatS=fLatS, adLonE=fLonE,bBigTiff=True)
 
-    sImportWithDict = wasdi.importProductList(aoImages,sProvider)
-
-    # STEP 4
-    # Get again the list of images in the workspace:
-
-    # Check if we have at least one image
-    if len(asAvailableImages) <= 0:
-         # Nothing found
-        wasdi.wasdiLog("No images available, nothing to do.")
-        wasdi.updateStatus("DONE", 100)
-        return
-    # Take only the Sentinel 1 files
-    for sImageToProcess in asAvailableImages:
-        sLocalImagePath = wasdi.getPath(sImageToProcess)
-        OSTProcess.process(sImageToProcess)
 
 
 
@@ -135,5 +143,5 @@ def days_between(d1, d2):
     return (d2 - d1).days
 
 if __name__ == '__main__':
-    wasdi.init("config.json")
+    wasdi.init("./config.json")
     run()
