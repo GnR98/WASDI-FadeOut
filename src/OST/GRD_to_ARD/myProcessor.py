@@ -108,7 +108,9 @@ def run():
         asImageTiff.append(temp)
         wasdi.addFileToWASDI(temp)
 
-
+    wasdi.mosaic(asImageTiff, "mosaicImg.tif")
+    SubsetImg=["subset.tif"]
+    wasdi.multiSubset(sInputFile="mosaicImg",asOutputFiles=SubsetImg, adLatN=[fLatN], adLonW=[fLonW], adLatS=[fLatS], adLonE=[fLonE],bBigTiff=True)
 
 
 
