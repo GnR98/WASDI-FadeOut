@@ -5,82 +5,147 @@ from meteostat import Point, Daily
 from datetime import timedelta
 import math
 from collections import OrderedDict
+import os
 
-def run():
-    # File location
-    loc = ("C:\\Users\\gnisc\\AppData\\Local\\Programs\\Python\\Python310\\weather\\Geolocation.xlsx")
+
+
+def WeatherStat(loc,daysBefore,daysAfter,district):
+
+    """
+    :param loc: location of the input excel file
+    :param daysBefore: number of days to search before the repair date
+    :param daysAfter: number of days to search after the repair date
+    :param district: name of the district (e.g. Turbigo)
+    :return:
+    """
 
     # Read only the column relative to: Comune, Inizio lavori, Coordinate
     wb = pd.read_excel(loc, na_values=['NA'], usecols="B,F,I,J")
-    # Filter only Turbigo
-    sheet=wb.query("Comune == 'TURBIGO' or Comune == 'TURBIGO ()' or Comune == 'TURBIGO (20029)'")
 
-    # New column used to insert the detail of preciptation on each day of the 15 days before the start work
-    sheet["Dettaglio 15 giorni prima"]=" "
-    sheet["Dettaglio 15 giorni dopo"]=" "
+    # Filter the chosen district
+    sheet= wb[wb['Comune'].str.contains(district)]
+
+    # New columns used to insert the details of preciptations on each requested date before and after the repair date
+    sheet["Dettaglio (in mm), "+daysBefore+" giorni prima (in ordine crescente di data)"]=" "
+    sheet["Dettaglio (in mm), "+daysAfter+" giorni dopo (in ordine crescente di data)"]=" "
 
     # For each date in the excel, put the mean value of the precipitation
-    # calculated on 15 days before the start work, on 'YourDataInAList'
-    # and put on Data the detail of preciptation on each day
-    # of the 15 days before the start work
+    # calculated on the days before('YourDataInAList1') and after('YourDataInaAList2') the repair date
+    # and put on Data1 and Data2 the details of preciptations of each day (same convention as prior comment)
     YourDataInAList1=[]
     Data1=[]
     YourDataInAList2 = []
     Data2 = []
     for i, row in sheet.iterrows():
         print(row)
-        start1 = row[1] - timedelta(days=15)
+        start1 = row[1] - timedelta(days= int(daysBefore))
         start2 = row[1]
 
         location = Point(row[3], row[2])
         end1 = row[1]
-        end2 = row[1] + timedelta(days=15)
+        end2 = row[1] + timedelta(days=int(daysAfter))
 
 
         data1 = Daily(location, start1, end1)
         data2 = Daily(location, start2, end2)
         data1 = data1.fetch()
         data2 = data2.fetch()
-        #15 giorni prima
+
+        #counter used to have the exact number of valid values
+        count= data1.prcp.size;
+
         if(data1.prcp.size!=0):
             tot = 0
-            #Mean value of precipitation in the 15 days before the start work
+            #Mean value of precipitation on the days before the repair date
             for q in data1.prcp:
                 Data1.append(q)
                 if not math.isnan(q):
                     tot += q
-            tot = tot / data1.prcp.size
+                else:
+                    count=count-1;
+            if count==0:
+                # We don't have valid values
+                tot = "nan"
+            else:
+                tot = tot / count
             YourDataInAList1.append(tot)
             print(data1.prcp[1])
         else:
-            YourDataInAList1.append(np.NAN)
-        #15 giorni dopo
+            tot = "nan"
+            YourDataInAList1.append("nan")
+
+        #Column used to store if there were or not any precipitations before the repair date
+        #the row values for this column are determined from the mean value
+        match tot:
+            case 0.0:
+                sheet.at[i, "Ha piovuto prima dei lavori ?"]="false"
+            case "nan":
+                sheet.at[i, "Ha piovuto prima dei lavori ?"]="nan"
+            case _:
+                sheet.at[i, "Ha piovuto prima dei lavori ?"]="true"
+
+        count= data2.prcp.size;
+
         if (data2.prcp.size != 0):
             tot = 0
-            # Mean value of precipitation in the 15 days after the start work
+            # Mean value of precipitation on the days after the repair date
             for q in data2.prcp:
                 Data2.append(q)
                 if not math.isnan(q):
                     tot += q
-            tot = tot / data2.prcp.size
+                else:
+                    count=count-1;
+            if count==0:
+                # We don't have valid values
+                tot = "nan"
+            else:
+                tot = tot / count
             YourDataInAList2.append(tot)
             print(data2.prcp[1])
         else:
-            YourDataInAList2.append(np.NAN)
+            tot = "nan"
+            YourDataInAList2.append("nan")
 
-        sheet.at[i,"Dettaglio 15 giorni prima (in ordine crescente di data)"]=Data1.copy()
-        sheet.at[i,"Dettaglio 15 giorni dopo (in ordine crescente di data)"]=Data2.copy()
+        #Column used to store if there were or not any precipitations after the repair date
+        #the row values for this column are determined from the mean value
+        match tot:
+            case 0.0:
+                sheet.at[i, "Ha piovuto dopo i lavori ?"]="false"
+            case "nan":
+                sheet.at[i, "Ha piovuto dopo i lavori ?"]="nan"
+            case _:
+                sheet.at[i, "Ha piovuto dopo i lavori ?"]="true"
+
+        #Insertion of detailed values of precipitation (in mm)
+        sheet.at[i,"Dettaglio (in mm), "+ daysBefore + " giorni prima (in ordine crescente di data)"]=Data1.copy()
+        sheet.at[i,"Dettaglio (in mm), "+ daysAfter + " giorni dopo (in ordine crescente di data)"]=Data2.copy()
 
         Data1.clear()
         Data2.clear()
 
-    sheet.insert(4,"Media precipitazioni nei 15 giorni prima dalla data di inizio(in mm)",value=YourDataInAList1)
-    sheet.insert(5,"Media precipitazioni nei 15 giorni dopo la data di inizio(in mm)",value=YourDataInAList2)
+    #Columns used to store the mean values
+    sheet.insert(6,"Media precipitazioni nei "+ daysBefore + " giorni prima dalla data di inizio(in mm)",value=YourDataInAList1)
+    sheet.insert(7,"Media precipitazioni nei "+ daysAfter + " giorni dopo la data di inizio(in mm)",value=YourDataInAList2)
 
-    sheet.to_excel("./YourNewExcel.xlsx", index=False);
+    #Earliest date of observation
+    xlsStartDate = sheet["Data Inizio Esito"].get(sheet["Data Inizio Esito"].index[0]).strftime("%d-%m-%Y")
+
+    #Latest date of observation
+    xlsEndDate= sheet["Data Inizio Esito"].get(sheet["Data Inizio Esito"].index[sheet["Data Inizio Esito"].size-1]).strftime("%d-%m-%Y")
+
+    #Output document containing all the details mentioned before,
+    #format of document name: "Prcp_NameOfDistrict_EarliestDate_LatestDate_past_nDaysBefore_future_nDaysAfter.xlsx"
+    sheet.to_excel("./Prcp_"+district+"_"+xlsStartDate+"_"+xlsEndDate+"_past_"+daysBefore+"_future_"+daysAfter+".xlsx", index=False);
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    run()
 
+    # File location
+    loc = os.getcwd()+"\\Geolocation.xlsx"
+    if(os.path.isfile(loc)):
+        daysBefore = input("Please specify for how many days before the repair you want to fetch data :\n")
+        daysAfter = input("Please specify  for how many days after the repair you want to fetch data :\n")
+        district = input("Please specify the district :\n").upper()
+        WeatherStat(loc,daysBefore,daysAfter,district)
+    else:
+        print("ERROR: No file named \"Geolocation.xlsx\" on project directory")
