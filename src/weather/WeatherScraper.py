@@ -40,6 +40,7 @@ def WeatherStat(loc,daysBefore,daysAfter,district):
     Data2 = []
     for i, row in sheet.iterrows():
         print(row)
+        print("\n")
         start1 = row[1] - timedelta(days= int(daysBefore))
         start2 = row[1]
 
@@ -71,7 +72,6 @@ def WeatherStat(loc,daysBefore,daysAfter,district):
             else:
                 tot = tot / count
             YourDataInAList1.append(tot)
-            print(data1.prcp[1])
         else:
             tot = "nan"
             YourDataInAList1.append("nan")
@@ -103,7 +103,6 @@ def WeatherStat(loc,daysBefore,daysAfter,district):
             else:
                 tot = tot / count
             YourDataInAList2.append(tot)
-            print(data2.prcp[1])
         else:
             tot = "nan"
             YourDataInAList2.append("nan")
