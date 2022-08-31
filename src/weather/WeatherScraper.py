@@ -1,10 +1,8 @@
-import numpy as np
 import pandas as pd
 from datetime import datetime
 from meteostat import Point, Daily
 from datetime import timedelta
 import math
-from collections import OrderedDict
 import os
 
 
