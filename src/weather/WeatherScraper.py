@@ -24,7 +24,9 @@ def WeatherStat(loc,daysBefore,daysAfter,district):
 
     # Filter the chosen district
     sheet= wb[wb['Comune'].str.contains(district)]
-
+    if(sheet.empty):
+        print("There is no data from the input file for the district of "+district)
+        exit()
     # New columns used to insert the details of preciptations on each requested date before and after the repair date
     sheet["Dettaglio (in mm), "+daysBefore+" giorni prima (in ordine crescente di data)"]=" "
     sheet["Dettaglio (in mm), "+daysAfter+" giorni dopo (in ordine crescente di data)"]=" "
@@ -139,13 +141,22 @@ def WeatherStat(loc,daysBefore,daysAfter,district):
 
 
 if __name__ == '__main__':
-
     # File location
     loc = os.getcwd()+"\\Geolocation.xlsx"
     if(os.path.isfile(loc)):
+
         daysBefore = input("Please specify for how many days before the repair you want to fetch data :\n")
+        while(not daysBefore.isnumeric()):
+            print("Please insert a number\n")
+            daysBefore = input("Please specify for how many days before the repair you want to fetch data :\n")
+
         daysAfter = input("Please specify  for how many days after the repair you want to fetch data :\n")
+        while (not daysAfter.isnumeric()):
+            print("Please insert a number")
+            daysAfter = input("Please specify for how many days after the repair you want to fetch data :\n")
+
         district = input("Please specify the district :\n").upper()
         WeatherStat(loc,daysBefore,daysAfter,district)
+
     else:
-        print("ERROR: No file named \"Geolocation.xlsx\" on project directory")
+        print("ERROR: No file named \"Geolocation.xlsx\" on project directory, check if the file is in the project directory")
