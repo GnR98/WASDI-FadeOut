@@ -2,5 +2,5 @@
   "DAYSBEFORE": 1,
   "DAYSAFTER": 1,
   "DISTRICT": "turbigo",
-  "EXCELLOC": "C:\\Users\\gnisc\\AppData\\Local\\Programs\\Python\\Python310\\weather\\Geolocation.xlsx"
+  "EXCELLOC": "ABSOLUTE PATH OF YOUR EXCEL SOURCE FILE"
 }
