@@ -7,7 +7,10 @@ import os
 # import module
 import json
 from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut
 
+
+geolocator = Nominatim(user_agent="CoordCheck")
 
 
 def WeatherStat(loc,daysBefore,daysAfter,district):
@@ -30,23 +33,18 @@ def WeatherStat(loc,daysBefore,daysAfter,district):
         exit()
     # New columns used to insert the details of preciptations on each requested date before and after the repair date
     # initialize Nominatim API
-    geolocator = Nominatim(user_agent="geoapiExercises")
 
-    sheet["Precipitations (in mm), from "+daysBefore+" days before (in ascending order of date)"]=" "
-    sheet["Precipitations (in mm), until "+daysAfter+" days after (in ascending order of date)"]=" "
+    sheet["Dettaglio (in mm), "+daysBefore+" giorni prima (in ordine crescente di data)"]=" "
+    sheet["Dettaglio (in mm), "+daysAfter+" giorni dopo (in ordine crescente di data)"]=" "
     # For each date in the excel, put the mean value of the precipitation
     # calculated on the days before('yourDataInAList1') and after('YourDataInaAList2') the repair date
-    # and put on prcp1 and prcp2 the details of preciptations of each day (same convention as prior comment)
+    # and put on data1 and data2 the details of preciptations of each day (same convention as prior comment)
     yourDataInAList1=[]
     prcp1=[]
     yourDataInAList2 = []
     prcp2 = []
-    
-    #For each row the column cityVillageTown is used to store a value that determines if the given coordinates belong to a city, a town or a village
-    #The locNames column contains the name of the city, town or village
     locNames=[]
     cityVillageTown=[]
-    
     for i, row in sheet.iterrows():
         print(row)
         print("\n")
@@ -56,11 +54,8 @@ def WeatherStat(loc,daysBefore,daysAfter,district):
         location = Point(row[3], row[2])
         end1 = row[1]
         end2 = row[1] + timedelta(days=int(daysAfter))
-        
-        #If the coordinates are not NAN the geolocaation process starts then, depending on the result, the columns
-        #cityVillageTown and locNames are filled with the correct values
         if( not math.isnan(row[3]) and not math.isnan(row[2]) ):
-            geolocation = geolocator.reverse(str(row[3]) + "," + str(row[2]))
+            geolocation = do_reverse(str(row[3]) + "," + str(row[2]))
             if ("city" in geolocation.raw["address"]):
                 cityVillageTown.append("city")
                 locNames.append(geolocation.raw["address"]["city"])
@@ -73,8 +68,7 @@ def WeatherStat(loc,daysBefore,daysAfter,district):
         else:
             locNames.append("nan")
             cityVillageTown.append("nan")
-            
-        #Using meteostat API
+
         data1 = Daily(location, start1, end1)
         data2 = Daily(location, start2, end2)
         data1 = data1.fetch()
@@ -106,11 +100,11 @@ def WeatherStat(loc,daysBefore,daysAfter,district):
         #the row values for this column are determined from the mean value
         match tot:
             case 0.0:
-                sheet.at[i, "Did it rain before the repair date ?"]="false"
+                sheet.at[i, "Ha piovuto prima dei lavori ?"]="false"
             case "nan":
-                sheet.at[i, "Did it rain before the repair date ?"]="nan"
+                sheet.at[i, "Ha piovuto prima dei lavori ?"]="nan"
             case _:
-                sheet.at[i, "Did it rain before the repair date ?"]="true"
+                sheet.at[i, "Ha piovuto prima dei lavori ?"]="true"
 
         count= data2.prcp.size;
 
@@ -137,24 +131,24 @@ def WeatherStat(loc,daysBefore,daysAfter,district):
         #the row values for this column are determined from the mean value
         match tot:
             case 0.0:
-                sheet.at[i, "Did it rain after the repair date ?"]="false"
+                sheet.at[i, "Ha piovuto dopo i lavori ?"]="false"
             case "nan":
-                sheet.at[i, "Did it rain after the repair date ?"]="nan"
+                sheet.at[i, "Ha piovuto dopo i lavori ?"]="nan"
             case _:
-                sheet.at[i, "Did it rain after the repair date ?"]="true"
+                sheet.at[i, "Ha piovuto dopo i lavori ?"]="true"
 
         #Insertion of detailed values of precipitation (in mm)
-        sheet.at[i,"Precipitations (in mm), from "+daysBefore+" days before (in ascending order of date)"]=prcp1.copy()
-        sheet.at[i,"Precipitations (in mm), until "+daysAfter+" days after (in ascending order of date)"]=prcp2.copy()
+        sheet.at[i,"Dettaglio (in mm), "+ daysBefore + " giorni prima (in ordine crescente di data)"]=prcp1.copy()
+        sheet.at[i,"Dettaglio (in mm), "+ daysAfter + " giorni dopo (in ordine crescente di data)"]=prcp2.copy()
 
         prcp1.clear()
         prcp2.clear()
 
     #Columns used to store the mean values
-    sheet.insert(6,"Mean precipitation value in the "+ daysBefore + " days before the repair date (in mm)",value=yourDataInAList1)
-    sheet.insert(7,"Mean precipitation value in the "+ daysAfter + " days after the repair date (in mm)",value=yourDataInAList2)
+    sheet.insert(6,"Media precipitazioni nei "+ daysBefore + " giorni prima dalla data di inizio(in mm)",value=yourDataInAList1)
+    sheet.insert(7,"Media precipitazioni nei "+ daysAfter + " giorni dopo la data di inizio(in mm)",value=yourDataInAList2)
     sheet.insert(8,"Type of location",value=cityVillageTown)
-    sheet.insert(9,"Name of location",value=locNames)
+    sheet.insert(9,"Dettaglio località",value=locNames)
 
     #Earliest date of observation
     xlsStartDate = sheet["Data Inizio Esito"].get(sheet["Data Inizio Esito"].index[0]).strftime("%d-%m-%Y")
@@ -167,8 +161,17 @@ def WeatherStat(loc,daysBefore,daysAfter,district):
     sheet.to_excel("./Prcp_"+district+"_"+xlsStartDate+"_"+xlsEndDate+"_past_"+daysBefore+"_future_"+daysAfter+".xlsx", index=False);
 
 
+def do_reverse(coordinate, attempt=1, max_attempts=5):
+    try:
+        return geolocator.reverse(coordinate)
+    except GeocoderTimedOut:
+        if attempt <= max_attempts:
+            return do_reverse(coordinate, attempt=attempt+1)
+        raise
+
+
 if __name__ == '__main__':
-    # JSON File location
+    # File location
     file = open("config.json")
     jsonData = json.load(file)
 
@@ -176,9 +179,7 @@ if __name__ == '__main__':
     daysAfter=""
     district=""
     loc=""
-    
-    #if a key does not exists or the value of the key is not given (causing variable == ""), a console input will be requested
-    #in order to fill the required variable
+
     if("DAYSBEFORE" in jsonData.keys()):
         daysBefore=jsonData.get("DAYSBEFORE")
     if(daysBefore==""):
@@ -206,7 +207,7 @@ if __name__ == '__main__':
     if(loc==""):
         loc= input("Please specify location of excel file in input :\n")
 
-    #When every required variable is filled the script checks whether the source excle file exists before calling the function
+
     if(os.path.isfile(loc)):
         WeatherStat(loc,str(daysBefore),str(daysAfter),district)
     else:
