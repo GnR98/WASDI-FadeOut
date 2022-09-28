@@ -25,7 +25,7 @@ def Checker(loc):
                 util(sheet,i,row)
             elif ("village" in geolocation.raw["address"] and row["Comune"].upper() not in geolocation.raw["address"]["village"].upper()):
                 util(sheet,i,row)
-    sheet.to_excel("NewGeolocation.xlsx", index=False);
+    return sheet;
 
 
 
@@ -67,6 +67,8 @@ def do_reverse(coordinate, attempt=1, max_attempts=5):
 if __name__ == '__main__':
     loc = input("Please specify location of excel file in input :\n")
     if (os.path.isfile(loc)):
-        Checker(loc)
+
+        sheet = Checker(loc)
+        sheet.to_excel("NewGeolocation.xlsx", index=False)
     else:
         print("ERROR: Excel source file not found")
