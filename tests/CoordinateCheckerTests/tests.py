@@ -75,6 +75,14 @@ class TestCoordinateChecker(unittest.TestCase):
        self.assertAlmostEqual(geo.latitude, expectedlat, 3)
        self.assertAlmostEqual(geo.longitude, expectedlong, 3)
 
+    def test_do_geocode_no_civic_no_street(self):
+       address = "MAGENTA, Italia"
+       expectedlat = 45.46704
+       expectedlong = 8.8958
+       geo = CoordinateChecker.do_geocode(address)
+       self.assertAlmostEqual(geo.latitude, expectedlat, 1)
+       self.assertAlmostEqual(geo.longitude, expectedlong, 1)
+
     def test_do_geocode_wrong_address(self):
         address = "MAGggENTA,VIA PASTRENGO,33"
         self.assertEqual(CoordinateChecker.do_geocode(address),None,"Indirizzo sbagliato deve restituire none")
@@ -110,6 +118,20 @@ class TestCoordinateChecker(unittest.TestCase):
             self.assertEqual(mock_geocode.call_count, 5, "Deve essere chiamata 5 volte")
 
     ############################ TEST util ############################
+
+    def test_util_full(self):
+        loctest="C:\\Users\\Matteo\\PycharmProjects\\Geolocation\\Sheets\\TestSheet_util.xlsx"
+        locres="C:\\Users\\Matteo\\PycharmProjects\\Geolocation\\Sheets\\TestSheet_util_result.xlsx"
+        testsheet = CoordinateChecker.pd.read_excel(loctest, na_values=['NA'])
+        ressheet = CoordinateChecker.pd.read_excel(locres, na_values=['NA'])
+        for i, row in testsheet.iterrows():
+            CoordinateChecker.util(testsheet,i,row)
+            self.assertAlmostEqual(testsheet.at[i,"COORD_Y SNAPSHOT GIS (LNG)"],ressheet.at[i,"COORD_Y SNAPSHOT GIS (LNG)"],3)
+            self.assertAlmostEqual(testsheet.at[i, "COORD_X SNAPSHOT GIS (LAT)"],ressheet.at[i, "COORD_X SNAPSHOT GIS (LAT)"],3)
+
+    ############################ TEST checker ############################
+
+
 
 
 
