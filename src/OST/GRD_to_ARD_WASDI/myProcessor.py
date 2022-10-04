@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 
 def run():
+    
     sBBox = wasdi.getParameter("BBOX")
     sDate = wasdi.getParameter("DATE")
     sMaxCloud = wasdi.getParameter("MAXCLOUD", "20")
@@ -84,7 +85,7 @@ def run():
 
     # STEP 3: Import product on WASDI
 
-    wasdi.importAndPreprocess(aoImages,"GRD_to_ARD1","_temp_ard")
+    wasdi.importAndPreprocess(aoImages,"GRD_to_ARD1","_temp_ard.tif")
     #
     # STEP 4
     # Get again the list of images in the workspace:
@@ -97,6 +98,9 @@ def run():
         return
     # Take only the Sentinel 1 files
     asSemiProcessedImages = wasdi.getProductsByActiveWorkspace()
+    for i in asSemiProcessedImages:
+        if("_temp_ard" not in i or ".zip" in i):
+            asSemiProcessedImages.remove(i);
     mosaicImages=[]
     for i in asSemiProcessedImages:
         if ("_temp_ard" in i):
@@ -104,10 +108,15 @@ def run():
             mosaicImages.append(i.replace("_temp_ard", "_ard"))
             wasdi.deleteProduct(i)
 
-    wasdi.mosaic(mosaicImages, "mosaicImg.tif")
+    for i in range(0,len(mosaicImages)):
+        if mosaicImages[i].endswith(".dim"):
+            mosaicImages[i] = mosaicImages[i][:-len(".dim")]
+        if(".zip" in mosaicImages[i]):
+            mosaicImages.remove(mosaicImages[i])
+    wasdi.mosaic(mosaicImages, "mosaicImg.vrt")
     SubsetImg = ["subset.tif"]
-    wasdi.multiSubset(sInputFile="mosaicImg", asOutputFiles=SubsetImg, adLatN=[fLatN], adLonW=[fLonW], adLatS=[fLatS],
-                      adLonE=[fLonE], bBigTiff=True)
+    wasdi.multiSubset(sInputFile="mosaicImg.vrt", asOutputFiles=SubsetImg, adLatN=[fLatN], adLonW=[fLonW],
+                      adLatS=[fLatS],adLonE=[fLonE], bBigTiff=True)
 
 
 
