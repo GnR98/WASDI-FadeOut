@@ -4,8 +4,9 @@
 
 DIBRIS – Università di Genova. Scuola Politecnica, Corso di Ingegneria del Software 80154
 
-
-<div align='right'> <b> Authors </b> <br> AA <br> BB  </div>
+**Authors**  
+Roberto Gnisci<br/>
+Matteo Aicardi
 
 ### REVISION HISTORY
 
