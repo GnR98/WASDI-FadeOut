@@ -1,10 +1,8 @@
 import pandas as pd
-from datetime import datetime
 from meteostat import Point, Daily
 from datetime import timedelta
 import math
 import os
-# import module
 import json
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
@@ -14,27 +12,40 @@ geolocator = Nominatim(user_agent="CoordCheck")
 def WeatherStat(loc, daysBefore, daysAfter, district):
 
     """
+    Function used to fetch data about precipitations in a set of given places and dates. The method filters the
+    excel file keeping only the rows that have in the "Comune" column the "district" value , then for each of them reads
+    the reparation date and fecthes the precipitation data for every day between (reparation date-daysBefore) and
+    (reparation date+daysAfter). The collected data is then organized in columns; more columns are added for the mean value
+    for the past and future days, a boolean variable that tells whether it has rained or not before or after the reparation date,
+    and the type of place (city,town,village). A new excel file will be created with all the relevant columns
+    (excess ones are cut)
+
+
     :param loc: location of the input excel file
     :param daysBefore: number of days to search before the repair date
     :param daysAfter: number of days to search after the repair date
     :param district: name of the district (e.g. Turbigo)
     :return:
     """
+    #Check inputs
+    if not os.path.exists(loc):
+        raise ValueError(f"{loc} is not valid path")
+
+
 
     # Read only the column relative to: Comune, Inizio lavori, Coordinate
     wb = pd.read_excel(loc, na_values=['NA'], usecols="B,F,I,J")
 
     # Filter the chosen district
+    district=district.upper()
     sheet = wb[wb['Comune'].str.contains(district)]
     if (sheet.empty):
-        print("There is no data from the input file for the district of " + district)
-        exit()
-    # New columns used to insert the details of preciptations on each requested date before and after the repair date
-    # initialize Nominatim API
-    geolocator = Nominatim(user_agent="geoapiExercises")
+        raise SystemExit("There is no data from the input file for the district of " + district)
 
-    sheet["Precipitations (in mm), from " + daysBefore + " days before (in ascending order of date)"] = " "
-    sheet["Precipitations (in mm), until " + daysAfter + " days after (in ascending order of date)"] = " "
+    # New columns used to insert the details of precipitations on each requested date before and after the repair date
+    sheet["Precipitations (in mm), from " + str(daysBefore) + " days before (in ascending order of date)"] = " "
+    sheet["Precipitations (in mm), until " + str(daysAfter) + " days after (in ascending order of date)"] = " "
+
     # For each date in the excel, put the mean value of the precipitation
     # calculated on the days before('yourDataInAList1') and after('YourDataInaAList2') the repair date
     # and put on prcp1 and prcp2 the details of preciptations of each day (same convention as prior comment)
@@ -49,8 +60,8 @@ def WeatherStat(loc, daysBefore, daysAfter, district):
     cityVillageTown = []
 
     for i, row in sheet.iterrows():
-        print(row)
-        print("\n")
+        # print(row)
+        # print("\n")
         start1 = row[1] - timedelta(days=int(daysBefore))
         start2 = row[1]
 
@@ -82,7 +93,7 @@ def WeatherStat(loc, daysBefore, daysAfter, district):
         data2 = data2.fetch()
 
         # counter used to have the exact number of valid values
-        count = data1.prcp.size;
+        count = data1.prcp.size
 
         if (data1.prcp.size != 0):
             tot = 0
@@ -92,7 +103,7 @@ def WeatherStat(loc, daysBefore, daysAfter, district):
                 if not math.isnan(q):
                     tot += q
                 else:
-                    count = count - 1;
+                    count = count - 1
             if count == 0:
                 # We don't have valid values
                 tot = "nan"
@@ -113,7 +124,7 @@ def WeatherStat(loc, daysBefore, daysAfter, district):
             case _:
                 sheet.at[i, "Did it rain before the repair date ?"] = "true"
 
-        count = data2.prcp.size;
+        count = data2.prcp.size
 
         if (data2.prcp.size != 0):
             tot = 0
@@ -123,7 +134,7 @@ def WeatherStat(loc, daysBefore, daysAfter, district):
                 if not math.isnan(q):
                     tot += q
                 else:
-                    count = count - 1;
+                    count = count - 1
             if count == 0:
                 # We don't have valid values
                 tot = "nan"
@@ -146,17 +157,17 @@ def WeatherStat(loc, daysBefore, daysAfter, district):
 
         # Insertion of detailed values of precipitation (in mm)
         sheet.at[
-            i, "Precipitations (in mm), from " + daysBefore + " days before (in ascending order of date)"] = prcp1.copy()
+            i, "Precipitations (in mm), from " + str(daysBefore) + " days before (in ascending order of date)"] = prcp1.copy()
         sheet.at[
-            i, "Precipitations (in mm), until " + daysAfter + " days after (in ascending order of date)"] = prcp2.copy()
+            i, "Precipitations (in mm), until " + str(daysAfter) + " days after (in ascending order of date)"] = prcp2.copy()
 
         prcp1.clear()
         prcp2.clear()
 
     # Columns used to store the mean values
-    sheet.insert(6, "Mean precipitation value in the " + daysBefore + " days before the repair date (in mm)",
+    sheet.insert(6, "Mean precipitation value in the " + str(daysBefore) + " days before the repair date (in mm)",
                  value=yourDataInAList1)
-    sheet.insert(7, "Mean precipitation value in the " + daysAfter + " days after the repair date (in mm)",
+    sheet.insert(7, "Mean precipitation value in the " + str(daysAfter) + " days after the repair date (in mm)",
                  value=yourDataInAList2)
     sheet.insert(8, "Type of location", value=cityVillageTown)
     sheet.insert(9, "Name of location", value=locNames)
@@ -171,8 +182,8 @@ def WeatherStat(loc, daysBefore, daysAfter, district):
     # Output document containing all the details mentioned before,
     # format of document name: "Prcp_NameOfDistrict_EarliestDate_LatestDate_past_nDaysBefore_future_nDaysAfter.xlsx"
     sheet.to_excel(
-        "./Prcp_" + district + "_" + xlsStartDate + "_" + xlsEndDate + "_past_" + daysBefore + "_future_" + daysAfter + ".xlsx",
-        index=False);
+        "./Prcp_" + district + "_" + xlsStartDate + "_" + xlsEndDate + "_past_" + str(daysBefore) + "_future_" + str(daysAfter) + ".xlsx",
+        index=False)
 
 def do_reverse(coordinate, attempt=1, max_attempts=5):
     try:
