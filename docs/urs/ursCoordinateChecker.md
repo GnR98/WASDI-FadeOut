@@ -16,7 +16,7 @@ Matteo Aicardi
 | 1.0 | 18/9/2022 |M. Aicardi, R. Gnisci | First Draft |
 | 1.1 | 28/9/2022 |M. Aicardi, R. Gnisci | Second Draft |
 | 1.2 | 7/10/2022 |M. Aicardi, R. Gnisci | Third Draft |
-| 1.2 | 10/10/2022 |M. Aicardi, R. Gnisci | Final Draft |
+| 1.3 | 10/10/2022 |M. Aicardi, R. Gnisci | Final Draft |
 
 # Table of Contents
 
