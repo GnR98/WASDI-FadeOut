@@ -100,8 +100,8 @@ FadeOut Software
 
 | ID | Descrizione | Priorità |
 | --------------- | ----------- | ---------- | 
-| 1.0 | The algorithm shall take in input the last date on which to search the image |M|
-| 1.1 | The algorithm shall take the number of days in the past on which you want to search compared to the last date|M|
+| 1.0 | The algorithm shall take in input the starting date on which to search the image |M|
+| 1.1 | The algorithm shall take the number of following days on which to search the image |M|
 | 2.0 | The algorithm shall take in input a bounding box defined by the user|M|
 | 3.0 | The algorithm shall take in input one of the proposed satellite image provider|O|
 | 4.0 | The algorithm shall takes in input the product image type|E|
