@@ -1,5 +1,5 @@
 {
-  "DISTRICT": "turbigo",
-  "EXCELLOC": "C:\\Users\\gnisc\\AppData\\Local\\Programs\\Python\\Python310\\weather\\Geolocation.xlsx",
-  "SHAPELOC": "C:\\Users\\gnisc\\AppData\\Local\\Programs\\Python\\Python310\\ShapeFileProjection\\_EXPORT_MODELLAZIONE_IDRAULICA\\WAT_PIPE.shp"
+  "DISTRICT": "district that you want to fetch (no matter if upper case or not)",
+  "EXCELLOC": "Location of NewGeolocation.xlsx file",
+  "SHAPELOC": "Location of the shapefile containing the main line"
 }
