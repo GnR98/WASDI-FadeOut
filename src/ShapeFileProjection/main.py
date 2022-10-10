@@ -10,7 +10,7 @@ import json
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
 from pyproj import Transformer
-
+import geopy.distance
 # Press Maiusc+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import  fiona
@@ -37,29 +37,32 @@ def run(excelloc,shapeloc,district):
     {'geometry': 'LineString', 'properties': OrderedDict([(u'FID', 'float:11')])}
     # first feature of the shapefile
     transformer = Transformer.from_crs("EPSG:32632", "EPSG:4326")
-
+    shapeDict= OrderedDict()
     #conversione coordinate da epsg 32632 a wgs84 e correzione vie delle tubature
     for i in shape:
         #print(i)
         temp=[]
+        shapeDict[i["id"]]=i
         for j in i["geometry"]["coordinates"]:
             temp.append(transformer.transform(j[0], j[1]))
-        i["geometry"]["coordinates"] = temp
+        #i["geometry"]["coordinates"] = temp
+        shapeDict[i["id"]]["geometry"]["coordinates"]=temp
         #inserisco la via corretta nello shape file controllando le coordinate
         if("road" in do_reverse(temp[0]).raw['address']):
-            i['properties']['STREET'] = do_reverse(temp[0]).raw['address']['road']
+            shapeDict[i["id"]]['properties']['STREET'] = do_reverse(temp[0]).raw['address']['road']
 
         #print("\n")
 
     for i, row in sheet.iterrows():
         temp=[]
-        for i in shape:
+        for j in shapeDict.values():
             # match delle vie tra shapefile e lavorazione
-            if(i['properties']['STREET'] != None):
-                if(row[2] in i['properties']['STREET'].upper() or  i['properties']['STREET'].upper() in row[2]):
-                    temp.append(i)
+            if(j['properties']['STREET'] != None):
+                if(row[2] in j['properties']['STREET'].upper() or  j['properties']['STREET'].upper() in row[2]):
+                    temp.append(j)
         if(temp):
             proiezione(temp,row)
+
 
 
 
@@ -76,9 +79,15 @@ def run(excelloc,shapeloc,district):
 
 gpd1['Nearest'] = gpd1.apply(lambda row: near(row.geometry), axis=1)'''
 
-
+#tengo solo la tubatura, con il nodo al suo interno, a distanza minima dalla lavorazione
 def proiezione(vettoreTubature,lavorazione):
-    print(vettoreTubature)
+    finalTubatura = None
+    min = 1000000
+    for tubatura in vettoreTubature:
+        for point in tubatura["geometry"]["coordinates"]:
+            if(geopy.distance.geodesic(point,(lavorazione[9],lavorazione[8]))<min):
+                finalTubatura= tubatura
+    print(finalTubatura)
 
 def do_reverse(coordinate, attempt=1, max_attempts=5):
     try:
