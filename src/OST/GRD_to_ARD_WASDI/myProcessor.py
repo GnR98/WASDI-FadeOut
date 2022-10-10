@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from pprint import pprint
 # 10 km buffer around AOI Point
@@ -7,14 +8,13 @@ from datetime import datetime, timedelta
 
 
 def run():
-    
+    #Get parameters from parameters.json
     sBBox = wasdi.getParameter("BBOX")
-    sDate = wasdi.getParameter("DATE")
+    sStartDate = wasdi.getParameter("STARTDATE",)
+    oStartDay = datetime.strptime(sStartDate,'%Y-%m-%d')
     sMaxCloud = wasdi.getParameter("MAXCLOUD", "20")
     sSearchDays = wasdi.getParameter("SEARCHDAYS", "10")
-
     sProvider = wasdi.getParameter("PROVIDER", "ONDA")
-
 
     # Check the Bounding Box: is needed
     if sBBox is None:
@@ -40,6 +40,7 @@ def run():
     fLatS = float(asBBox[2])
     fLonE = float(asBBox[3])
 
+    #Getting the number of days to search so that EndDate may be calculated
     iDaysToSearch = 10
 
     try:
@@ -47,20 +48,13 @@ def run():
     except Exception as oEx:
         wasdi.wasdiLog(f'Number of days to search not valid due to {repr(oEx)}, assuming 10 [' + str(sSearchDays) + "]")
 
-    # Check the date: assume now
-    oEndDay = datetime.today()
-
-    try:
-        # Try to convert the one in the params
-        oEndDay = datetime.strptime(sDate, '%Y-%m-%d')
-    except Exception as oEx:
-        # No good: force to yesterday
-        wasdi.wasdiLog(f'Date not valid due to {repr(oEx)}, assuming today')
-
+    #Computing the EndDate (the string version is needed for the search algorithm)
     oTimeDelta = timedelta(days=iDaysToSearch)
-    oStartDay = oEndDay - oTimeDelta
+    oEndDay = oStartDay + oTimeDelta
+    if oEndDay - datetime.today() > timedelta(days=0):
+        wasdi.wasdiLog(f'Date not valid, assuming today')
+        oEndDay=datetime.today()
     sEndDate = oEndDay.strftime("%Y-%m-%d")
-    sStartDate = oStartDay.strftime("%Y-%m-%d")
 
     # Print the date
     wasdi.wasdiLog("Search from " + sStartDate + " to " + sEndDate)
@@ -75,7 +69,7 @@ def run():
         wasdi.wasdiLog("Cloud Coverage not set")
 
     # STEP 2: Search EO Images
-    aoImages = wasdi.searchEOImages("S1", sStartDate, sEndDate, fLatN, fLonW, fLatS, fLonE,"GRD", None, None,
+    aoImages = wasdi.searchEOImages("S1", sStartDate, sEndDate, fLatN, fLonW, fLatS, fLonE, "GRD", None, None,
                                     sCloudCoverage, sProvider)
 
     asAvailableImages = []
@@ -83,10 +77,10 @@ def run():
         wasdi.wasdiLog("Image Name WITHOUT Extension:" + oImage['title'])
         asAvailableImages.append(oImage['fileName'])
 
-    # STEP 3: Import product on WASDI
+    # STEP 3: Import product on WASDI and process it with the first workflow
 
-    wasdi.importAndPreprocess(aoImages,"GRD_to_ARD1","_temp_ard.tif")
-    #
+    wasdi.importAndPreprocess(aoImages, "GRD_to_ARD1", "_temp_ard.tif")
+
     # STEP 4
     # Get again the list of images in the workspace:
 
@@ -96,29 +90,43 @@ def run():
         wasdi.wasdiLog("No images available, nothing to do.")
         wasdi.updateStatus("DONE", 100)
         return
-    # Take only the Sentinel 1 files
+
+    # Take only the already processed files
     asSemiProcessedImages = wasdi.getProductsByActiveWorkspace()
     for i in asSemiProcessedImages:
-        if("_temp_ard" not in i or ".zip" in i):
-            asSemiProcessedImages.remove(i);
-    mosaicImages=[]
+        if ("_temp_ard" not in i or ".zip" in i):
+            asSemiProcessedImages.remove(i)
+
+    #Process the images again with the second workflow and save the names in an array
+    asMosaicImages = []
     for i in asSemiProcessedImages:
         if ("_temp_ard" in i):
             wasdi.executeWorkflow([i], [i.replace("_temp_ard", "_ard")], "GRD_to_ARD2")
-            mosaicImages.append(i.replace("_temp_ard", "_ard"))
+            asMosaicImages.append(i.replace("_temp_ard", "_ard"))
             wasdi.deleteProduct(i)
 
-    for i in range(0,len(mosaicImages)):
-        if mosaicImages[i].endswith(".dim"):
-            mosaicImages[i] = mosaicImages[i][:-len(".dim")]
-        if(".zip" in mosaicImages[i]):
-            mosaicImages.remove(mosaicImages[i])
-    wasdi.mosaic(mosaicImages, "mosaicImg.vrt")
-    SubsetImg = ["subset.tif"]
-    wasdi.multiSubset(sInputFile="mosaicImg.vrt", asOutputFiles=SubsetImg, adLatN=[fLatN], adLonW=[fLonW],
-                      adLatS=[fLatS],adLonE=[fLonE], bBigTiff=True)
+    #Use the new array as input to create a mosaic
+    # for i in range(0, len(asMosaicImages)):
+    #     if asMosaicImages[i].endswith(".dim"):
+    #          asMosaicImages[i] = asMosaicImages[i][:-len(".dim")]
+    #     if (".zip" in asMosaicImages[i]):
+    #         asMosaicImages.remove(asMosaicImages[i])
+    sMosaicImgName = "mosaicImg_"+sStartDate+"_"+asBBox[0]+"-"+asBBox[1]+"-"+asBBox[2]+"-"+asBBox[3]+".tif"
+    wasdi.mosaic(asMosaicImages, sMosaicImgName)
 
+    #Create a subset of the newly obtained mosaic
+    SubsetImg = ["subset_"+sStartDate+"_"+asBBox[0]+"-"+asBBox[1]+"-"+asBBox[2]+"-"+asBBox[3]+".tif"]
+    wasdi.multiSubset(sInputFile=sMosaicImgName, asOutputFiles=SubsetImg, adLatN=[fLatN], adLonW=[fLonW],
+                      adLatS=[fLatS], adLonE=[fLonE], bBigTiff=True)
 
+    #(Optional) Delete the ARD products
+    bDeleteArd = True
+    if (bDeleteArd):
+        for sARDimage in asMosaicImages:
+            try:
+                wasdi.deleteProduct(sARDimage)
+            except:
+                wasdi.wasdiLog("Error removing " + sARDimage)
 
 
 if __name__ == '__main__':
