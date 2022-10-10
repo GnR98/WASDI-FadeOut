@@ -1,6 +1,6 @@
 {
   "DAYSBEFORE": 1,
   "DAYSAFTER": 1,
-  "DISTRICT": "turbigo",
-  "EXCELLOC": "ABSOLUTE PATH OF YOUR EXCEL SOURCE FILE"
+  "DISTRICT": "cassina de' pecchi",
+  "EXCELLOC": "C:\\Users\\Matteo\\PycharmProjects\\Geolocation\\WeatherScraperTests\\Sheets\\TestSheet_WeatherStat.xlsx"
 }
