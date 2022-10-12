@@ -4,12 +4,13 @@ import math
 import os
 
 import shapely.geometry.linestring
-from shapely.ops import nearest_points
 # import module
 import json
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
 from pyproj import Transformer
+from pyproj import Geod
+
 import geopy.distance
 # Press Maiusc+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
@@ -18,8 +19,14 @@ from collections import OrderedDict
 from shapely.geometry import shape
 import geopandas as gpd
 from pyproj import CRS
+from shapely.geometry import LineString,Point
+from shapely.ops import nearest_points
+
 
 geolocator = Nominatim(user_agent="CoordCheck")
+geod= Geod(ellps="WGS84")
+finalLineStrings = []
+dict = OrderedDict()
 
 
 def run(excelloc,shapeloc,district):
@@ -33,29 +40,10 @@ def run(excelloc,shapeloc,district):
     sheet["Proiezione"]=" "
 
     shape = fiona.open(shapeloc)
-    print(shape.schema)
-    {'geometry': 'LineString', 'properties': OrderedDict([(u'FID', 'float:11')])}
-    # first feature of the shapefile
-    transformer = Transformer.from_crs("EPSG:32632", "EPSG:4326")
-    shapeDict= OrderedDict()
-    #conversione coordinate da epsg 32632 a wgs84 e correzione vie delle tubature
-    for i in shape:
-        #print(i)
-        temp=[]
-        shapeDict[i["id"]]=i
-        for j in i["geometry"]["coordinates"]:
-            temp.append(transformer.transform(j[0], j[1]))
-        #i["geometry"]["coordinates"] = temp
-        shapeDict[i["id"]]["geometry"]["coordinates"]=temp
-        #inserisco la via corretta nello shape file controllando le coordinate
-        if("road" in do_reverse(temp[0]).raw['address']):
-            shapeDict[i["id"]]['properties']['STREET'] = do_reverse(temp[0]).raw['address']['road']
-
-        #print("\n")
 
     for i, row in sheet.iterrows():
         temp=[]
-        for j in shapeDict.values():
+        for j in shape:
             # match delle vie tra shapefile e lavorazione
             if(j['properties']['STREET'] != None):
                 if(row[2] in j['properties']['STREET'].upper() or  j['properties']['STREET'].upper() in row[2]):
@@ -65,29 +53,48 @@ def run(excelloc,shapeloc,district):
 
 
 
+    for i,row in sheet.iterrows():
+        for j in dict:
+            if(len(j.split(":"))>1 and row[3]==row[3]):
+                if(j.split(":")[0] in row[2] and j.split(":")[1] in row[3]):
+                    sheet.at[i, "Proiezione"] = dict.get(j)
+            if(len(j.split(":"))==1):
+                if (j.split(":")[0] in row[2]):
+                    sheet.at[i, "Proiezione"] = dict.get(j)
+
+    sheet.to_excel(
+        "Provalo3.xlsx",
+        index=False);
+    print("adsa")
 
 
-
-
-
-    #pts3 = gpd2.geometry.unary_union
-
-'''def near(point, pts=pts3):
-    # find the nearest point and return the corresponding Place value
-    nearest = gpd2.geometry == nearest_points(point, pts)[1]
-    return gpd2[nearest].Place.get_values()[0]
-
-gpd1['Nearest'] = gpd1.apply(lambda row: near(row.geometry), axis=1)'''
-
-#tengo solo la tubatura, con il nodo al suo interno, a distanza minima dalla lavorazione
 def proiezione(vettoreTubature,lavorazione):
-    finalTubatura = None
-    min = 1000000
+    #finalTubatura = None
+    minDistance = 1000000
+    i=0
+    tempPoint=None
     for tubatura in vettoreTubature:
         for point in tubatura["geometry"]["coordinates"]:
-            if(geopy.distance.geodesic(point,(lavorazione[9],lavorazione[8]))<min):
+            if(i==1):
+                line = LineString([tempPoint,point])
+                if(geod.geometry_length(LineString(nearest_points(line,Point(lavorazione[9],lavorazione[8]))))<minDistance):
+                    minDistance=geod.geometry_length(LineString(nearest_points(line,Point(lavorazione[9],lavorazione[8]))))
+                    if(lavorazione[3]==lavorazione[3]):
+                        dict[lavorazione[2]+":"+lavorazione[3]]=nearest_points(line,Point(lavorazione[9],lavorazione[8]))[0]
+                    else:
+                        dict[lavorazione[2]] = nearest_points(line, Point(lavorazione[9], lavorazione[8]))[0]
+                i=0
+            else:
+                tempPoint=point
+                i+=1
+            '''if(geopy.distance.geodesic(point,(lavorazione[9],lavorazione[8]))<min):
                 finalTubatura= tubatura
     print(finalTubatura)
+    for tubatura in vettoreTubature:
+        finalLineStrings.append(LineString(tubatura["geometry"]["coordinates"]))'''
+
+
+
 
 def do_reverse(coordinate, attempt=1, max_attempts=5):
     try:
