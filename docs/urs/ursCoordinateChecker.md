@@ -54,7 +54,7 @@ This document introduces the Requirement Analysis in Software Engineering for th
 
 | Name				| Definition | 
 | ------------------------------------- | ----------- | 
-| METEOSTAT API                                  | Interface used to check and eventually fetch the coordinates|
+| NOMINATIM API                                  | Interface used to check and eventually fetch the coordinates|
 | WASDI                                   | Web Advanced Space Developer Interface |
 
 <a name="sp1.3"></a>
