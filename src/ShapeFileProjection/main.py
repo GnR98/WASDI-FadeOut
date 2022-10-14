@@ -1,31 +1,21 @@
-# This is a sample Python script.
+his is a sample Python script.
 import pandas as pd
-import math
 import os
-
 import shapely.geometry.linestring
 # import module
 import json
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
-from pyproj import Transformer
 from pyproj import Geod
-
-import geopy.distance
-# Press Maiusc+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import  fiona
 from collections import OrderedDict
 from shapely.geometry import shape
-import geopandas as gpd
-from pyproj import CRS
 from shapely.geometry import LineString,Point
 from shapely.ops import nearest_points
 
 
 geolocator = Nominatim(user_agent="CoordCheck")
 geod= Geod(ellps="WGS84")
-finalLineStrings = []
 dict = OrderedDict()
 
 
@@ -37,7 +27,8 @@ def run(excelloc,shapeloc,district):
         print("There is no data from the input file for the district of " + district)
         exit()    # Use a breakpoint in the code line below to debug your script.
 
-    sheet["Proiezione"]=" "
+    sheet["Proiezione (LAT)"]=" "
+    sheet["Proiezione (LNG)"]=" "
 
     shape = fiona.open(shapeloc)
 
@@ -46,8 +37,17 @@ def run(excelloc,shapeloc,district):
         for j in shape:
             # match delle vie tra shapefile e lavorazione
             if(j['properties']['STREET'] != None):
-                if(row[2] in j['properties']['STREET'].upper() or  j['properties']['STREET'].upper() in row[2]):
-                    temp.append(j)
+                '''if(row[2] in j['properties']['STREET'].upper() or  j['properties']['STREET'].upper() in row[2]):
+                    temp.append(j)'''
+                if (j['properties']['STREET'].__contains__(".")):
+                    if (j['properties']['STREET'].split(".")[1].upper() in row[2]):
+                        temp.append(j)
+                if (row[2].__contains__(".")):
+                    if (row[2].split(".")[1] in j['properties']['STREET'].upper()):
+                        temp.append(j)
+                else:
+                    if (row[2] in j['properties']['STREET'].upper() or j['properties']['STREET'].upper() in row[2]):
+                        temp.append(j)
         if(temp):
             proiezione(temp,row)
 
@@ -57,15 +57,17 @@ def run(excelloc,shapeloc,district):
         for j in dict:
             if(len(j.split(":"))>1 and row[3]==row[3]):
                 if(j.split(":")[0] in row[2] and j.split(":")[1] in row[3]):
-                    sheet.at[i, "Proiezione"] = dict.get(j)
+                    sheet.at[i, "Proiezione (LAT)"] = dict.get(j).x
+                    sheet.at[i, "Proiezione (LNG)"] = dict.get(j).y
+
             if(len(j.split(":"))==1):
                 if (j.split(":")[0] in row[2]):
-                    sheet.at[i, "Proiezione"] = dict.get(j)
+                    sheet.at[i, "Proiezione (LAT)"] = dict.get(j).x
+                    sheet.at[i, "Proiezione (LNG)"] = dict.get(j).y
 
     sheet.to_excel(
-        "Provalo3.xlsx",
+        "Provalo4.xlsx",
         index=False);
-    print("adsa")
 
 
 def proiezione(vettoreTubature,lavorazione):
@@ -87,12 +89,6 @@ def proiezione(vettoreTubature,lavorazione):
             else:
                 tempPoint=point
                 i+=1
-            '''if(geopy.distance.geodesic(point,(lavorazione[9],lavorazione[8]))<min):
-                finalTubatura= tubatura
-    print(finalTubatura)
-    for tubatura in vettoreTubature:
-        finalLineStrings.append(LineString(tubatura["geometry"]["coordinates"]))'''
-
 
 
 
