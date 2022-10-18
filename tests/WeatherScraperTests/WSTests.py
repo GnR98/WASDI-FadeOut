@@ -1,16 +1,19 @@
 import os
 import unittest
 import WeatherScraper
+import pandas as pd
 
 class WeatherScraperTest(unittest.TestCase):
+
+    WS=WeatherScraper.WeatherScraper()
 
     def test_WeatherStat_Turbigo(self):
         loctest="Sheets/TestSheet_WeatherStat.xlsx"
         locres="Sheets/TestSheet_WeatherStat_res_turbigo.xlsx"
-        WeatherScraper.WeatherStat(os.path.abspath(loctest),1,1,"TURBIGO")
+        self.WS.WeatherStat(os.path.abspath(loctest),1,1,"TURBIGO")
 
-        ressheet = WeatherScraper.pd.read_excel(os.path.abspath(locres), na_values=['NA'])
-        weathersheet = WeatherScraper.pd.read_excel("Prcp_TURBIGO_30-11-2012_11-01-2013_past_1_future_1.xlsx", na_values=['NA'])
+        ressheet = pd.read_excel(os.path.abspath(locres), na_values=['NA'])
+        weathersheet = pd.read_excel("Prcp_TURBIGO_30-11-2012_11-01-2013_past_1_future_1.xlsx", na_values=['NA'])
 
         for i,row in weathersheet.iterrows():
             self.assertEqual(
@@ -37,10 +40,10 @@ class WeatherScraperTest(unittest.TestCase):
     def test_WeatherStat_Magenta(self):
         loctest="Sheets/TestSheet_WeatherStat.xlsx"
         locres="Sheets/TestSheet_WeatherStat_res_magenta.xlsx"
-        WeatherScraper.WeatherStat(os.path.abspath(loctest),1,1,"MAGENTA")
+        self.WS.WeatherStat(os.path.abspath(loctest),1,1,"MAGENTA")
 
-        ressheet = WeatherScraper.pd.read_excel(os.path.abspath(locres), na_values=['NA'])
-        weathersheet = WeatherScraper.pd.read_excel("Prcp_MAGENTA_05-06-2017_27-09-2017_past_1_future_1.xlsx", na_values=['NA'])
+        ressheet = pd.read_excel(os.path.abspath(locres), na_values=['NA'])
+        weathersheet = pd.read_excel("Prcp_MAGENTA_05-06-2017_27-09-2017_past_1_future_1.xlsx", na_values=['NA'])
 
         for i,row in weathersheet.iterrows():
             self.assertEqual(
@@ -67,10 +70,10 @@ class WeatherScraperTest(unittest.TestCase):
     def test_WeatherStat_Cassina(self):
         loctest="Sheets/TestSheet_WeatherStat.xlsx"
         locres="Sheets/TestSheet_WeatherStat_res_cassina.xlsx"
-        WeatherScraper.WeatherStat(os.path.abspath(loctest),1,1,"CASSINA DE' PECCHI")
+        self.WS.WeatherStat(os.path.abspath(loctest),1,1,"CASSINA DE' PECCHI")
 
-        ressheet = WeatherScraper.pd.read_excel(os.path.abspath(locres), na_values=['NA'])
-        weathersheet = WeatherScraper.pd.read_excel("Prcp_CASSINA DE' PECCHI_22-07-2015_20-02-2021_past_1_future_1.xlsx", na_values=['NA'])
+        ressheet = pd.read_excel(os.path.abspath(locres), na_values=['NA'])
+        weathersheet = pd.read_excel("Prcp_CASSINA DE' PECCHI_22-07-2015_20-02-2021_past_1_future_1.xlsx", na_values=['NA'])
 
         for i,row in weathersheet.iterrows():
             self.assertEqual(
@@ -96,18 +99,19 @@ class WeatherScraperTest(unittest.TestCase):
 
     def test_WeatherStat_null_loc(self):
         loctest = ""
-        self.assertRaises(ValueError,WeatherScraper.WeatherStat,loctest, 1, 1, "TURBIGO")
+        self.assertRaises(ValueError,self.WS.WeatherStat,loctest, 1, 1, "TURBIGO")
 
     def test_WeatherStat_file_not_found(self):
-        loctest = "WeatherScraperTests/Sheets/aTestSheet_WeatherStat.xlsx"
-        self.assertRaises(ValueError, WeatherScraper.WeatherStat,os.path.abspath(loctest), 1, 1, "TURBIGO")
+        loctest = "+self.WSTests/Sheets/aTestSheet_WeatherStat.xlsx"
+        self.assertRaises(ValueError, self.WS.WeatherStat,os.path.abspath(loctest), 1, 1, "TURBIGO")
 
     def test_WeatherStat_invalid_days(self):
         loctest = "Sheets/TestSheet_WeatherStat.xlsx"
-        self.assertRaises(ValueError, WeatherScraper.WeatherStat,os.path.abspath(loctest), "", 1, "TURBIGO")
+        self.assertRaises(ValueError, self.WS.WeatherStat,os.path.abspath(loctest), "", 1, "TURBIGO")
 
     def test_WeatherStat_empty_filtered_sheet(self):
         loctest = "Sheets/TestSheet_WeatherStat.xlsx"
-        self.assertRaises(SystemExit, WeatherScraper.WeatherStat,os.path.abspath(loctest), 1, 1, "Tasdfsa")
+        self.assertRaises(SystemExit, self.WS.WeatherStat,os.path.abspath(loctest), 1, 1, "Tasdfsa")
+
 
 
