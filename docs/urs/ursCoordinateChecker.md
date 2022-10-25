@@ -61,7 +61,7 @@ This document introduces the Requirement Analysis in Software Engineering for th
 
 ### 1.3 References 
 
-https://dev.meteostat.net/python/#installation (METEOSTAT library webpage)
+https://geopy.readthedocs.io/en/stable/ (Geopy NOMINATIM API)
 <a name="p2"></a>
 
 ## 2. System Description
