@@ -40,7 +40,7 @@ Matteo Aicardi
 
 ## 1. Introduction
 The present document describe the functional and non-functional requirements of a python class that reads from the leaks Excel database where an intervention occured and then projects
-the obtained coordinates on the pipe network. The algorithm inside the class needs a specific coordinate system and is able to change the coordinate system of the pipe network file to meet this constraint.
+the obtained coordinates on the pipe network. The algorithm inside the class needs a specific coordinate reference system and is able to change the one used in the pipe network file to meet this constraint.
 
 
 <a name="sp1.1"></a>
@@ -57,15 +57,17 @@ This document introduces the Requirement Analysis in Software Engineering for th
 | Name				| Definition | 
 | ------------------------------------- | ----------- | 
 | NOMINATIM API                           | Interface used to check and eventually fetch the coordinates|
-|EPSG 32632                               | Coordinate System used in the original pipe network file |
-| WGS84                                   | Coordinate System needed to use the projection algorithm|
+| EPSG 32632                              | Coordinate reference system used in the original pipe network file |
+| WGS84                                   | Coordinate reference system needed to use the projection algorithm|
 | WASDI                                   | Web Advanced Space Developer Interface |
 
 <a name="sp1.3"></a>
 
 ### 1.3 References 
 
-https://dev.meteostat.net/python/#installation (METEOSTAT library webpage)
+https://geopy.readthedocs.io/en/stable/ (Geopy NOMINATIM API)
+https://pyproj4.github.io/pyproj/stable/ (pyproj)
+https://shapely.readthedocs.io/en/maint-1.8/ (shapely)
 <a name="p2"></a>
 
 ## 2. System Description
@@ -75,13 +77,12 @@ https://dev.meteostat.net/python/#installation (METEOSTAT library webpage)
 <a name="sp2.2"></a>
 WASDI operates in various fields including the development of an algorithm capable of recognizing if a water leak has happened near a pipe.
 To achieve that they need to train an AI with a correct dataset, part of this dataset is inside a database with coordinates of places where a leak
-has already occured and repaired. When analyzing an image it is needed to know if the water that is visible is caused by the leak or by other
-causes, collecting precipitation data helps to filter the images where rain might have been the origin of the visible water.
-The assignment of city, town or village to a pair of coordinates is useful to recognize if agricultural activities may be nearby.
+has already occured and repaired. The coordinates, however, may not exactly correspond to a pipe in the pipe network leaving a doubt about which one had the leak.
+
 
 ### 2.2 Project Obectives 
 <a name="p3"></a>
-This algorithm aims to create an excel file with precipitation data for each repair intervention.
+This algorithm aims to create an excel file containing also a set of projected coordinates for each selected intervention.
 
 ## 3. Requirements
 
@@ -103,15 +104,13 @@ FadeOut Software
 | ID | Descrizione | Priorità |
 | --------------- | ----------- | ---------- | 
 | 1.0 | The algorithm shall take in input the location of the Excel file |M|
-| 2.0 | The algorithm shall take in input the number of days prior the repair date on which to search for data |M|
-| 2.1 | The algorithm shall take in input the number of days following the repair date on which to search for data |M|
+| 2.0 | The algorithm shall take in input the location of the shapefile containing the locations of all the pipes |M|
 | 3.0 | The algorithm shall take in input the name of the district in order to search data only for the repairs done in the given district |M|
-| 4.0 | The algorithm may take in a json file containing all the inputs previously specified |D|
-| 5.0 | The algorithm shall output a new Excel file |M|
-| 5.1 | The new Excel file shall have two columns to collect precipitation data, one for the period of time before the repair date and one for the following period of time |M|
-| 5.2 | The new Excel file shall have two columns (one for each semi-period of time) containig the mean value of the collected data|M|
-| 5.3 | The new Excel file shall have two columns (one for each semi-period of time) containig a true/false/nan value that represents if it has rained in that period of time|O|
-| 5.4 | The new Excel file shall have a column containing if the row's coordinates belong to a city,town or village|D|
+| 4.0 | The algorithm shall consider only the interventions done on the pipe network.may take in a json file containing all the inputs previously specified |M|
+| 5.0 | The algorithm may take in a json file containing all the inputs previously specified |D|
+| 6.0 | The algorithm shall be able to change the coordinate reference system of a shapefile from EPSG 32632 to WGS84|M|
+| 7.0 | The algorithm shall output a new Excel file |M|
+| 7.1 | The new Excel file shall have two new columns containing the set pf projected coordinates |M|
 
 <a name="sp3.3"></a>
 ### 3.2 Non-Functional Requirements 
