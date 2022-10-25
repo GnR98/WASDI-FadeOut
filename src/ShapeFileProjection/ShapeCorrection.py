@@ -28,7 +28,6 @@ def run(shapeloc):
 
 
     shape = fiona.open(shapeloc)
-    # first feature of the shapefile
     transformer = Transformer.from_crs("EPSG:32632", "EPSG:4326")
     shapeDict= OrderedDict()
     #conversione coordinate da epsg 32632 a wgs84 e correzione vie delle tubature
@@ -80,6 +79,3 @@ if __name__ == '__main__':
         run(shapeloc)
     else:
         print("ERROR: Shape source file not found")
-
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
