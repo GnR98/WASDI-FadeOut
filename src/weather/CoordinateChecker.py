@@ -31,10 +31,10 @@ class CoordinatesChecker():
         self.sheet = pd.read_excel(loc, na_values=['NA'])
         for i, row in self.sheet.iterrows():
 
-            if (not math.isnan(row[9]) and not math.isnan(row[8])):
+            if (not math.isnan(row["COORD_Y SNAPSHOT GIS (LNG)"]) and not math.isnan(row["COORD_X SNAPSHOT GIS (LAT)"])):
 
                 #check the coordinates that the Nominatim API gives us with the current address
-                geolocation = self.do_reverse(str(row[9]) + "," + str(row[8]))
+                geolocation = self.do_reverse(str(row["COORD_Y SNAPSHOT GIS (LNG)"]) + "," + str(row["COORD_X SNAPSHOT GIS (LAT)"]))
 
                 #if the district is not the same as the one the API returns then the script corrects them with util
                 if ("city" in geolocation.raw["address"] and row["Comune"].upper() not in geolocation.raw["address"]["city"].upper()):
@@ -57,9 +57,9 @@ class CoordinatesChecker():
         :return:
         """
 
-        comune=str(row[1])
-        via=str(row[2])
-        civico=str(row[3])
+        comune=str(row["Comune"])
+        via=str(row["Indirizzo"])
+        civico=str(row["Civico"])
 
         #if the geocode operations does not fail the substitution occurs in the sheet
         if (newgeo := self.do_geocode(comune + " " + via+" "+civico)) is not None:
