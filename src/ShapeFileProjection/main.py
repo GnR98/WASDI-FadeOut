@@ -56,13 +56,13 @@ class Projection():
                 # match delle vie tra shapefile e lavorazione
                 if(j['properties']['STREET'] != None):
                     if (j['properties']['STREET'].__contains__(".")):
-                        if (j['properties']['STREET'].split(".")[1].upper() in row[2]):
+                        if (j['properties']['STREET'].split(".")[1].upper() in row["Indirizzo"]):
                             temp.append(j)
-                    if (row[2].__contains__(".")):
-                        if (row[2].split(".")[1] in j['properties']['STREET'].upper()):
+                    if (row["Indirizzo"].__contains__(".")):
+                        if (row["Indirizzo"].split(".")[1] in j['properties']['STREET'].upper()):
                             temp.append(j)
                     else:
-                        if (row[2] in j['properties']['STREET'].upper() or j['properties']['STREET'].upper() in row[2]):
+                        if (row["Indirizzo"] in j['properties']['STREET'].upper() or j['properties']['STREET'].upper() in row["Indirizzo"]):
                             temp.append(j)
             if(temp):
                 self.projectOnClosestPipe(temp, row)
@@ -71,13 +71,13 @@ class Projection():
 
         for i,row in self.sheet.iterrows():
             for j in self.dict:
-                if(len(j.split(":"))>1 and row[3]==row[3]):
-                    if(j.split(":")[0] in row[2] and j.split(":")[1] in row[3]):
+                if(len(j.split(":"))>1 and row["Indirizzo"]==row["Indirizzo"] and row["Civico"]==row["Civico"]):
+                    if(j.split(":")[0] in row["Indirizzo"] and j.split(":")[1] in row["Civico"]):
                         self.sheet.at[i, "Proiezione (LAT)"] = self.dict.get(j).x
                         self.sheet.at[i, "Proiezione (LNG)"] = self.dict.get(j).y
 
                 if(len(j.split(":"))==1):
-                    if (j.split(":")[0] in row[2]):
+                    if (j.split(":")[0] in row["Indirizzo"]):
                         self.sheet.at[i, "Proiezione (LAT)"] = self.dict.get(j).x
                         self.sheet.at[i, "Proiezione (LNG)"] = self.dict.get(j).y
 
@@ -105,12 +105,12 @@ class Projection():
             for point in tubatura["geometry"]["coordinates"]:
                 if(i==1):
                     line = LineString([tempPoint,point])
-                    if(self.geod.geometry_length(LineString(nearest_points(line, Point(interventionRow[9], interventionRow[8]))))<minDistance):
-                        minDistance=self.geod.geometry_length(LineString(nearest_points(line, Point(interventionRow[9], interventionRow[8]))))
-                        if(interventionRow[3]==interventionRow[3]):
-                            self.dict[interventionRow[2] + ":" + interventionRow[3]]=nearest_points(line, Point(interventionRow[9], interventionRow[8]))[0]
+                    if(self.geod.geometry_length(LineString(nearest_points(line, Point(interventionRow["COORD_Y SNAPSHOT GIS (LNG)"], interventionRow["COORD_X SNAPSHOT GIS (LAT)"]))))<minDistance):
+                        minDistance=self.geod.geometry_length(LineString(nearest_points(line, Point(interventionRow["COORD_Y SNAPSHOT GIS (LNG)"], interventionRow["COORD_X SNAPSHOT GIS (LAT)"]))))
+                        if(interventionRow["Civico"]==interventionRow["Civico"]):
+                            self.dict[interventionRow["Indirizzo"] + ":" + interventionRow["Civico"]]=nearest_points(line, Point(interventionRow["COORD_Y SNAPSHOT GIS (LNG)"], interventionRow["COORD_X SNAPSHOT GIS (LAT)"]))[0]
                         else:
-                            self.dict[interventionRow[2]] = nearest_points(line, Point(interventionRow[9], interventionRow[8]))[0]
+                            self.dict[interventionRow["Indirizzo"]] = nearest_points(line, Point(interventionRow["COORD_Y SNAPSHOT GIS (LNG)"], interventionRow["COORD_X SNAPSHOT GIS (LAT)"]))[0]
                     i=0
                 else:
                     tempPoint=point
@@ -210,7 +210,7 @@ if __name__ == '__main__':
             proj= Projection()
 
             # If the shapefile has not been corrected yet uncomment the line below (correction is needed only once for each shapefile)
-            # proj.convertShapefile(shapeloc)
+            #proj.convertShapefile(shapeloc)
 
             proj.getAllProjections(excelloc, shapeloc, district)
         else:
