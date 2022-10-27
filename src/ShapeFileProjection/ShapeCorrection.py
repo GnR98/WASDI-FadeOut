@@ -19,17 +19,18 @@ from shapely.geometry import shape
 import geopandas as gpd
 from pyproj import CRS
 from shapely.geometry import LineString
+from fiona.crs import from_epsg
 
 
 geolocator = Nominatim(user_agent="CoordCheck")
 
 
 def run(shapeloc):
-
-
+    crs = from_epsg(4326)
     shape = fiona.open(shapeloc)
     transformer = Transformer.from_crs("EPSG:32632", "EPSG:4326")
     shapeDict= OrderedDict()
+
     #conversione coordinate da epsg 32632 a wgs84 e correzione vie delle tubature
     for i in shape:
         #print(i)
@@ -47,7 +48,7 @@ def run(shapeloc):
 
     my_schema= {'properties': OrderedDict([('OBJECTID', 'int:10'), ('NAME_NUM', 'str:254'), ('MUN', 'str:254'), ('STREET', 'str:254'), ('ISTAT', 'str:6'), ('MUN_OWN', 'str:254'), ('MAIN_FUNCT', 'str:254'), ('SPEC_FUNCT', 'str:254'), ('HYDR_FUNCT', 'str:254'), ('WAT_QUAL', 'str:254'), ('OPERATOR', 'str:254'), ('STATUS', 'str:254'), ('DETERMINAT', 'str:254'), ('DIAMETER', 'str:254'), ('MATERIAL', 'str:254'), ('MATERIAL_T', 'str:254'), ('LENGTH', 'float:31.15'), ('GROUND_ELE', 'float:31.15'), ('COVERING', 'float:31.15'), ('SURF_POS', 'str:254'), ('PIPE_NAME', 'str:254'), ('START_NODE', 'str:254'), ('END_NODE', 'str:254'), ('DATE_ACQ', 'date'), ('DATE_INS', 'date'), ('REMARK', 'str:254'), ('CREA_DATE', 'date'), ('LA_ED_DATE', 'date'), ('DMA', 'str:254')]), 'geometry': 'LineString'}
 
-    with fiona.open(shapeloc, 'w', driver='ESRI Shapefile', schema=my_schema) as output:
+    with fiona.open(shapeloc.removesuffix(".shp")+"prova.shp", 'w', driver='ESRI Shapefile', schema=my_schema, crs=crs) as output:
         for key, value in shapeDict.items():
             output.write({'geometry': value["geometry"], 'properties': value["properties"]})
 
