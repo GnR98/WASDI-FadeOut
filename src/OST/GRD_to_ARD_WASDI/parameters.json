@@ -1,7 +1,19 @@
 {
   "NAME": "GRD_to_ARD",
-  "BBOX": "45.9,8.5,45.7,8.7",
-  "STARTDATE": "2022-03-25",
+  "BBOX": {
+        "northEast": {
+            "lat": 45.9,
+            "lng": 8.7
+        },
+        "southWest": {
+            "lat": 45.7,
+            "lng": 8.5
+        }
+   },
+  "STARTDATE": "2021-03-25",
   "SEARCHDAYS": "5",
-  "PROVIDER": "AUTO"
+  "PROVIDER": "AUTO",
+  "MAXCLOUD": 20,
+  "DELETE ARD": true
+
 }
