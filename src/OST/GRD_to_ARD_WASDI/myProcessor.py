@@ -9,36 +9,32 @@ from datetime import datetime, timedelta
 
 def run():
     #Get parameters from parameters.json
-    sBBox = wasdi.getParameter("BBOX")
+    oBBox = wasdi.getParameter("BBOX")
     sStartDate = wasdi.getParameter("STARTDATE",)
     oStartDay = datetime.strptime(sStartDate,'%Y-%m-%d')
-    sMaxCloud = wasdi.getParameter("MAXCLOUD", "20")
+    sMaxCloud = str((wasdi.getParameter("MAXCLOUD", 20)))
     sSearchDays = wasdi.getParameter("SEARCHDAYS", "10")
     sProvider = wasdi.getParameter("PROVIDER", "ONDA")
+    bDeleteArd = wasdi.getParameter("DELETE ARD", "")
 
     # Check the Bounding Box: is needed
-    if sBBox is None:
+    if oBBox is None:
         wasdi.wasdiLog("BBOX Parameter not set. Exit")
         wasdi.updateStatus("ERROR", 0)
         return
 
     # Split the bbox: it is in the format: NORTH, WEST, SOUTH, EAST
-    asBBox = sBBox.split(",")
-
-    if len(asBBox) != 4:
-        wasdi.wasdiLog("BBOX Not valid. Please use LATN,LONW,LATS,LONE")
-        wasdi.wasdiLog("BBOX received:" + sBBox)
+    try :
+        fLatN = float(oBBox["northEast"]["lat"])
+        fLonE = float(oBBox["northEast"]["lng"])
+        fLatS = float(oBBox["southWest"]["lat"])
+        fLonW = float(oBBox["southWest"]["lng"])
+    except Exception as oEx:
+        wasdi.wasdiLog(f"BBOX Not valid. due to {repr(oEx)} Please use LATN,LONE,LATS,LONW")
         wasdi.wasdiLog("exit")
         wasdi.updateStatus("ERROR", 0)
         return
 
-    # Ok is good, print it and convert in float
-    wasdi.wasdiLog("Bounding Box: " + sBBox)
-
-    fLatN = float(asBBox[0])
-    fLonW = float(asBBox[1])
-    fLatS = float(asBBox[2])
-    fLonE = float(asBBox[3])
 
     #Getting the number of days to search so that EndDate may be calculated
     iDaysToSearch = 10
@@ -111,22 +107,23 @@ def run():
     #          asMosaicImages[i] = asMosaicImages[i][:-len(".dim")]
     #     if (".zip" in asMosaicImages[i]):
     #         asMosaicImages.remove(asMosaicImages[i])
-    sMosaicImgName = "mosaicImg_"+sStartDate+"_"+asBBox[0]+"-"+asBBox[1]+"-"+asBBox[2]+"-"+asBBox[3]+".tif"
+    sMosaicImgName = "mosaicImg_"+sStartDate+"_"+str(fLatN)+"-"+str(fLonE)+"-"+str(fLatS)+"-"+str(fLonW)+".tif"
     wasdi.mosaic(asMosaicImages, sMosaicImgName)
 
     #Create a subset of the newly obtained mosaic
-    SubsetImg = ["subset_"+sStartDate+"_"+asBBox[0]+"-"+asBBox[1]+"-"+asBBox[2]+"-"+asBBox[3]+".tif"]
+    SubsetImg = ["subset_"+sStartDate+"_"+str(fLatN)+"-"+str(fLonE)+"-"+str(fLatS)+"-"+str(fLonW)+".tif"]
     wasdi.multiSubset(sInputFile=sMosaicImgName, asOutputFiles=SubsetImg, adLatN=[fLatN], adLonW=[fLonW],
                       adLatS=[fLatS], adLonE=[fLonE], bBigTiff=True)
+    #wasdi._downloadFile("subset_"+sStartDate+"_"+str(fLatN)+"-"+str(fLonE)+"-"+str(fLatS)+"-"+str(fLonW)+".tif")
 
     #(Optional) Delete the ARD products
-    bDeleteArd = True
+
     if (bDeleteArd):
         for sARDimage in asMosaicImages:
             try:
                 wasdi.deleteProduct(sARDimage)
-            except:
-                wasdi.wasdiLog("Error removing " + sARDimage)
+            except Exception as oEx:
+                wasdi.wasdiLog("Error removing " +sARDimage+ f"due to {repr(oEx)}")
 
 
 if __name__ == '__main__':
