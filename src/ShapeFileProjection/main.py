@@ -164,7 +164,7 @@ class Projection():
              ('DATE_ACQ', 'date'), ('DATE_INS', 'date'), ('REMARK', 'str:254'), ('CREA_DATE', 'date'),
              ('LA_ED_DATE', 'date'), ('DMA', 'str:254')]), 'geometry': 'LineString'}
 
-        with fiona.open(shapeloc.removesuffix(".shp") + "prova.shp", 'w', driver='ESRI Shapefile', schema=my_schema,
+        with fiona.open(shapeloc, 'w', driver='ESRI Shapefile', schema=my_schema,
                         crs=crs) as output:
             for key, value in shapeDict.items():
                 output.write({'geometry': value["geometry"], 'properties': value["properties"]})
