@@ -105,12 +105,12 @@ class Projection():
             for point in tubatura["geometry"]["coordinates"]:
                 if(i==1):
                     line = LineString([tempPoint,point])
-                    if(self.geod.geometry_length(LineString(nearest_points(line, Point(interventionRow["COORD_Y SNAPSHOT GIS (LNG)"], interventionRow["COORD_X SNAPSHOT GIS (LAT)"]))))<minDistance):
-                        minDistance=self.geod.geometry_length(LineString(nearest_points(line, Point(interventionRow["COORD_Y SNAPSHOT GIS (LNG)"], interventionRow["COORD_X SNAPSHOT GIS (LAT)"]))))
+                    if(self.geod.geometry_length(LineString(nearest_points(line, Point(interventionRow["COORD_X SNAPSHOT GIS (LAT)"], interventionRow["COORD_Y SNAPSHOT GIS (LNG)"]))))<minDistance):
+                        minDistance=self.geod.geometry_length(LineString(nearest_points(line, Point(interventionRow["COORD_X SNAPSHOT GIS (LAT)"], interventionRow["COORD_Y SNAPSHOT GIS (LNG)"]))))
                         if(interventionRow["Civico"]==interventionRow["Civico"]):
-                            self.dict[interventionRow["Indirizzo"] + ":" + interventionRow["Civico"]]=nearest_points(line, Point(interventionRow["COORD_Y SNAPSHOT GIS (LNG)"], interventionRow["COORD_X SNAPSHOT GIS (LAT)"]))[0]
+                            self.dict[interventionRow["Indirizzo"] + ":" + interventionRow["Civico"]]=nearest_points(line, Point(interventionRow["COORD_X SNAPSHOT GIS (LAT)"], interventionRow["COORD_Y SNAPSHOT GIS (LNG)"]))[0]
                         else:
-                            self.dict[interventionRow["Indirizzo"]] = nearest_points(line, Point(interventionRow["COORD_Y SNAPSHOT GIS (LNG)"], interventionRow["COORD_X SNAPSHOT GIS (LAT)"]))[0]
+                            self.dict[interventionRow["Indirizzo"]] = nearest_points(line, Point(interventionRow["COORD_X SNAPSHOT GIS (LAT)"], interventionRow["COORD_Y SNAPSHOT GIS (LNG)"]))[0]
                     i=0
                 else:
                     tempPoint=point
@@ -130,22 +130,29 @@ class Projection():
         :return:
         """
 
+        srs = osr.SpatialReference()  ###
+        srs.SetFromUserInput("EPSG:4326")  ###
+        crs = srs.ExportToWkt()
+        # crs = from_epsg(4326)
         shape = fiona.open(shapeloc)
-        # first feature of the shapefile
         transformer = Transformer.from_crs("EPSG:32632", "EPSG:4326")
         shapeDict = OrderedDict()
+
         # conversione coordinate da epsg 32632 a wgs84 e correzione vie delle tubature
         for i in shape:
+            # print(i)
             temp = []
             shapeDict[i["id"]] = i
             for j in i["geometry"]["coordinates"]:
-                temp.append(transformer.transform(j[0], j[1]))
+                p = transformer.transform(j[0], j[1])
+                temp.append(tuple(reversed(p)))
             # i["geometry"]["coordinates"] = temp
             shapeDict[i["id"]]["geometry"]["coordinates"] = temp
             # inserisco la via corretta nello shape file controllando le coordinate
-            if ("road" in self.do_reverse(temp[0]).raw['address']) :
-                shapeDict[i["id"]]['properties']['STREET'] = self.do_reverse(temp[0]).raw['address']['road']
+            if ("road" in do_reverse(temp[0]).raw['address']):
+                shapeDict[i["id"]]['properties']['STREET'] = do_reverse(temp[0]).raw['address']['road']
 
+            # print("\n")
 
         my_schema = {'properties': OrderedDict(
             [('OBJECTID', 'int:10'), ('NAME_NUM', 'str:254'), ('MUN', 'str:254'), ('STREET', 'str:254'),
@@ -157,7 +164,8 @@ class Projection():
              ('DATE_ACQ', 'date'), ('DATE_INS', 'date'), ('REMARK', 'str:254'), ('CREA_DATE', 'date'),
              ('LA_ED_DATE', 'date'), ('DMA', 'str:254')]), 'geometry': 'LineString'}
 
-        with fiona.open(shapeloc, 'w', driver='ESRI Shapefile', schema=my_schema) as output:
+        with fiona.open(shapeloc.removesuffix(".shp") + "prova.shp", 'w', driver='ESRI Shapefile', schema=my_schema,
+                        crs=crs) as output:
             for key, value in shapeDict.items():
                 output.write({'geometry': value["geometry"], 'properties': value["properties"]})
 
