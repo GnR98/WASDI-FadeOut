@@ -13,7 +13,6 @@
   "STARTDATE": "2021-03-25",
   "SEARCHDAYS": "5",
   "PROVIDER": "AUTO",
-  "MAXCLOUD": 20,
   "DELETE ARD": true
 
 }

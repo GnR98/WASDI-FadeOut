@@ -56,26 +56,26 @@ def run():
     wasdi.wasdiLog("Search from " + sStartDate + " to " + sEndDate)
 
     # Check the cloud coverage
-    sCloudCoverage = None
-
-    if sMaxCloud is not None:
-        sCloudCoverage = "[0 TO " + sMaxCloud + "]"
-        wasdi.wasdiLog("Cloud Coverage " + sCloudCoverage)
-    else:
-        wasdi.wasdiLog("Cloud Coverage not set")
 
     # STEP 2: Search EO Images
     aoImages = wasdi.searchEOImages("S1", sStartDate, sEndDate, fLatN, fLonW, fLatS, fLonE, "GRD", None, None,
-                                    sCloudCoverage, sProvider)
+                                     sProvider)
 
     asAvailableImages = []
     for oImage in aoImages:
         wasdi.wasdiLog("Image Name WITHOUT Extension:" + oImage['title'])
         asAvailableImages.append(oImage['fileName'])
 
+    aoImagestoimport=[]
+
+    asProductsinWorkspace=wasdi.getProductsByActiveWorkspace()
+    for sImage in asAvailableImages:
+        if sImage.replace(".zip","_ard.tif") not in asProductsinWorkspace:
+            aoImagestoimport.append([oImage for oImage in aoImages if oImage["fileName"]==sImage][0])
+
     # STEP 3: Import product on WASDI and process it with the first workflow
 
-    wasdi.importAndPreprocess(aoImages, "GRD_to_ARD1", "_temp_ard.tif")
+    wasdi.importAndPreprocess(aoImagestoimport, "GRD_to_ARD1", "_temp_ard.tif")
 
     # STEP 4
     # Get again the list of images in the workspace:
@@ -88,27 +88,23 @@ def run():
         return
 
     # Take only the already processed files
-    asSemiProcessedImages = wasdi.getProductsByActiveWorkspace()
-    for i in asSemiProcessedImages:
-        if ("_temp_ard" not in i or ".zip" in i):
-            asSemiProcessedImages.remove(i)
+    asSemiProcessedImages = [oImage["fileName"].replace(".zip","_temp_ard.tif") for oImage in aoImagestoimport]
 
     #Process the images again with the second workflow and save the names in an array
     asMosaicImages = []
-    for i in asSemiProcessedImages:
-        if ("_temp_ard" in i):
-            wasdi.executeWorkflow([i], [i.replace("_temp_ard", "_ard")], "GRD_to_ARD2")
-            asMosaicImages.append(i.replace("_temp_ard", "_ard"))
-            wasdi.deleteProduct(i)
+    for sSemiProcessedImage in asSemiProcessedImages:
+        #if ("_temp_ard" in sSemiProcessedImage):
+            wasdi.executeWorkflow([sSemiProcessedImage], [sSemiProcessedImage.replace("_temp_ard", "_ard")], "GRD_to_ARD2")
+
+    asProductsinWorkspace = wasdi.getProductsByActiveWorkspace()
+    for oImage in aoImages:
+        sFile=oImage["fileName"].replace(".zip","_ard.tif")
+        if sFile in asProductsinWorkspace:
+            asMosaicImages.append(sFile)
 
     #Use the new array as input to create a mosaic
-    # for i in range(0, len(asMosaicImages)):
-    #     if asMosaicImages[i].endswith(".dim"):
-    #          asMosaicImages[i] = asMosaicImages[i][:-len(".dim")]
-    #     if (".zip" in asMosaicImages[i]):
-    #         asMosaicImages.remove(asMosaicImages[i])
-    sMosaicImgName = "mosaicImg_"+sStartDate+"_"+str(fLatN)+"-"+str(fLonE)+"-"+str(fLatS)+"-"+str(fLonW)+".tif"
-    wasdi.mosaic(asMosaicImages, sMosaicImgName)
+    sMosaicImgName = "mosaicImg_"+sStartDate+"_"+str(fLatN)+"-"+str(fLonE)+"-"+str(fLatS)+"-"+str(fLonW)+".vrt"
+    wasdi.mosaic(asMosaicImages, sMosaicImgName,iNoDataValue=0)
 
     #Create a subset of the newly obtained mosaic
     SubsetImg = ["subset_"+sStartDate+"_"+str(fLatN)+"-"+str(fLonE)+"-"+str(fLatS)+"-"+str(fLonW)+".tif"]
@@ -119,7 +115,13 @@ def run():
     #(Optional) Delete the ARD products
 
     if (bDeleteArd):
-        for sARDimage in asMosaicImages:
+        for oImage in aoImages:
+            sTempARDImage = oImage["fileName"].replace(".zip", "_temp_ard.tif")
+            sARDimage = oImage["fileName"].replace(".zip", "_ard.tif")
+            try:
+                wasdi.deleteProduct(sTempARDImage)
+            except Exception as oEx:
+                wasdi.wasdiLog("Error removing " + sTempARDImage + f"due to {repr(oEx)}")
             try:
                 wasdi.deleteProduct(sARDimage)
             except Exception as oEx:
