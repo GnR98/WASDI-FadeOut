@@ -29,6 +29,12 @@ class CoordinatesChecker():
 
         #Read Excel file and for every row do a check in the ccordinates (i is the row number, row is the actual row)
         self.sheet = pd.read_excel(loc, na_values=['NA'])
+        
+         #invert the LAT and LNG column values ( they are wrong from raw data)
+        lng= self.sheet["COORD_Y SNAPSHOT GIS (LNG)"]
+        self.sheet["COORD_Y SNAPSHOT GIS (LNG)"]=self.sheet["COORD_X SNAPSHOT GIS (LAT)"]
+        self.sheet["COORD_X SNAPSHOT GIS (LAT)"]=lng
+        
         for i, row in self.sheet.iterrows():
 
             if (not math.isnan(row["COORD_Y SNAPSHOT GIS (LNG)"]) and not math.isnan(row["COORD_X SNAPSHOT GIS (LAT)"])):
