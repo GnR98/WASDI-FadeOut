@@ -140,9 +140,12 @@ specifications    </p>
 
 ### <a name="architecture"></a>  3.1 System Architecture
 <details> 
-    <summary> Put a summary of the section
+    <summary> Graphic of the System Architecture
     </summary>
-    <p>This sub section should describe ...</p>
+    <p>
+        Graphical representation of the system architecture.  
+    <img src="imgs/System_architecture.png" alt="System Architecture" style="float: left; margin-right: 10px;" />   
+    </p>
 </details>
 
 ### <a name="interfaces"></a>  3.2 System Interfaces
