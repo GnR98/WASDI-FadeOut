@@ -144,7 +144,7 @@ specifications    </p>
     </summary>
     <p>
         Graphical representation of the system architecture.  
-    <img src="imgs/System_architecture.png" alt="System Architecture" style="float: left; margin-right: 10px;" />   
+    <img src="imgs/System_Architecture.png" alt="System Architecture" style="float: left; margin-right: 10px;" />   
     </p>
 </details>
 
