@@ -70,14 +70,14 @@ class WeatherScraper():
             start1 = row["Data Inizio Esito"] - timedelta(days=int(daysBefore))
             start2 = row["Data Inizio Esito"]
 
-            location = Point(row["COORD_Y SNAPSHOT GIS (LNG)"], row["COORD_X SNAPSHOT GIS (LAT)"])
+            location = Point(row["COORD_X SNAPSHOT GIS (LAT)"], row["COORD_Y SNAPSHOT GIS (LNG)"])
             end1 = row["Data Inizio Esito"]
             end2 = row["Data Inizio Esito"] + timedelta(days=int(daysAfter))
 
             # If the coordinates are not NAN the geolocaation process starts then, depending on the result, the columns
             # cityVillageTown and locNames are filled with the correct values
             if (not math.isnan(row["COORD_Y SNAPSHOT GIS (LNG)"]) and not math.isnan(row["COORD_X SNAPSHOT GIS (LAT)"])):
-                geolocation = self.do_reverse(str(row["COORD_Y SNAPSHOT GIS (LNG)"]) + "," + str(row["COORD_X SNAPSHOT GIS (LAT)"]))
+                geolocation = self.do_reverse(str(row["COORD_X SNAPSHOT GIS (LAT)"]) + "," + str(row["COORD_Y SNAPSHOT GIS (LNG)"]))
                 if ("city" in geolocation.raw["address"]):
                     cityVillageTown.append("city")
                     locNames.append(geolocation.raw["address"]["city"])
