@@ -9,6 +9,7 @@ from geopy.exc import GeocoderTimedOut
 from pyproj import Geod
 from pyproj import Transformer
 import fiona
+import osgeo.osr as osr
 from collections import OrderedDict
 from shapely.geometry import shape
 from shapely.geometry import LineString,Point
@@ -38,22 +39,35 @@ class Projection():
         :return:
         """
 
+        # check inputs
+        if not os.path.exists(excelloc):
+            raise ValueError(f"{excelloc} is not valid path")
+        if not os.path.exists(shapeloc):
+            raise ValueError(f"{shapeloc} is not valid path")
+
+        #read excel file
         wb = pd.read_excel(excelloc, na_values=['NA'])
+        #filtering of excel file considering only the selected "Comune"
+        # and all the row containing the "rete" word inside the "Intervento" column
         self.sheet = wb[wb['Comune'].str.contains(district)]
         self.sheet = self.sheet[self.sheet['Intervento'].str.contains('rete')]
+        #check if we've got a non empty result
         if (self.sheet.empty):
+            raise SystemExit("There is no data from the input file for the district of " + district)
             print("There is no data from the input file for the district of " + district)
             exit()    # Use a breakpoint in the code line below to debug your script.
 
+        #creation of the 2 new column used to insert the projected coordinates
         self.sheet["Proiezione (LAT)"]=" "
         self.sheet["Proiezione (LNG)"]=" "
 
+        #shape object
         shape = fiona.open(shapeloc)
 
+        # match between the street names of shape and excel files
         for i, row in self.sheet.iterrows():
             temp=[]
             for j in shape:
-                # match delle vie tra shapefile e lavorazione
                 if(j['properties']['STREET'] != None):
                     if (j['properties']['STREET'].__contains__(".")):
                         if (j['properties']['STREET'].split(".")[1].upper() in row["Indirizzo"]):
@@ -68,7 +82,7 @@ class Projection():
                 self.projectOnClosestPipe(temp, row)
 
 
-
+        #take all the coordinates in self.dict and store it on the excel file
         for i,row in self.sheet.iterrows():
             for j in self.dict:
                 if(len(j.split(":"))>1 and row["Indirizzo"]==row["Indirizzo"] and row["Civico"]==row["Civico"]):
@@ -80,9 +94,9 @@ class Projection():
                     if (j.split(":")[0] in row["Indirizzo"]):
                         self.sheet.at[i, "Proiezione (LAT)"] = self.dict.get(j).x
                         self.sheet.at[i, "Proiezione (LNG)"] = self.dict.get(j).y
-
+        shapename = os.path.basename(shapeloc).split('.')[0]
         self.sheet.to_excel(
-            "NewGeolocation_ShapefileProj_"+district+".xlsx",index=False)
+            "NewGeolocation_" + shapename + "_" + district + ".xlsx", index=False)
 
 
     def projectOnClosestPipe(self, pipesVector, interventionRow):
@@ -101,10 +115,11 @@ class Projection():
         minDistance = 1000000
         i=0
         tempPoint=None
+        #take the min distance between the
         for tubatura in pipesVector:
             for point in tubatura["geometry"]["coordinates"]:
                 if(i==1):
-                    line = LineString([tempPoint,point])
+                    line = LineString([tempPoint,tuple(reversed(point))])
                     if(self.geod.geometry_length(LineString(nearest_points(line, Point(interventionRow["COORD_X SNAPSHOT GIS (LAT)"], interventionRow["COORD_Y SNAPSHOT GIS (LNG)"]))))<minDistance):
                         minDistance=self.geod.geometry_length(LineString(nearest_points(line, Point(interventionRow["COORD_X SNAPSHOT GIS (LAT)"], interventionRow["COORD_Y SNAPSHOT GIS (LNG)"]))))
                         if(interventionRow["Civico"]==interventionRow["Civico"]):
@@ -129,6 +144,9 @@ class Projection():
         :param shapeloc: Absolute location of the shapefile that needs to be converted
         :return:
         """
+        # check inputs
+        if not os.path.exists(shapeloc):
+            raise ValueError(f"{shapeloc} is not valid path")
 
         srs = osr.SpatialReference()  ###
         srs.SetFromUserInput("EPSG:4326")  ###
@@ -149,8 +167,8 @@ class Projection():
             # i["geometry"]["coordinates"] = temp
             shapeDict[i["id"]]["geometry"]["coordinates"] = temp
             # inserisco la via corretta nello shape file controllando le coordinate
-            if ("road" in do_reverse(temp[0]).raw['address']):
-                shapeDict[i["id"]]['properties']['STREET'] = do_reverse(temp[0]).raw['address']['road']
+            if ("road" in self.do_reverse(temp[0]).raw['address']):
+                shapeDict[i["id"]]['properties']['STREET'] = self.do_reverse(temp[0]).raw['address']['road']
 
             # print("\n")
 
