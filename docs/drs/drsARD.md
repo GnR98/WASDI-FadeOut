@@ -1,4 +1,4 @@
-#GRD to ARD conversion algorithm 
+# GRD to ARD conversion algorithm 
 
 ## Design Requirement Specification Document
 
@@ -91,7 +91,7 @@ Matteo Aicardi
         https://docs.python.org/3/library/os.html
     </p>
     <p>
-         https://docs.python.org/3/library/pathlib.html?highlight=pathlib#module-pathlib (libraries used to manage internal paths)
+        https://docs.python.org/3/library/pathlib.html?highlight=pathlib#module-pathlib (libraries used to manage internal paths)
     </p>
 </details>
 
@@ -108,9 +108,16 @@ Matteo Aicardi
 ### <a name="tech"></a> 2.2 Technologies used
 
 <details> 
-    <summary> Description of the overall architecture. </summary>
-    <p>Graphical representation of the system architecture.  May be composed by multiple diagrams depending on the differences in the environment
-specifications    </p>
+    <summary> Software used to develope the algorithm </summary>
+    <p>
+        https://www.jetbrains.com/pycharm/  (PyCharm IDE)
+    </p>
+    <p>
+        https://step.esa.int/main/toolboxes/snap/ (SNAP S1 Toolbox, used to check the resulting images and developing the workflows)
+    </p>
+    <p>
+        https://www.wasdi.net/#!/home (WASDI cloud services and libraries)
+    </p>
 </details>
 
 ### <a name="constraints"></a> 2.3 Assumption and Constraint 
@@ -191,11 +198,6 @@ specifications    </p>
 </details>
 
 ## <a name="sys-module-1"></a>  4 System Module 1
-<details> 
-    <summary> Put a summary of the section
-    </summary>
-    <p>This sub section should describe ...</p>
-</details>
 
 ### <a name="sd"></a>  4.1 Structural Diagrams
 <details> 
