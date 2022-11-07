@@ -40,14 +40,6 @@ Matteo Aicardi
     3. [System Data](#data)
         1. [System Inputs](#inputs)
         2. [System Outputs](#outputs)
-4. [System Module 1](#sys-module-1)
-    1. [Structural Diagrams](#sd)
-        1. [Class Diagram](#cd)
-            1. [Class Description](#cd-description)
-        2. [Object Diagram](#od)
-        3. [Dynamic Models](#dm)
-5. [System Module 2](#sys-module-2)
-   1. ...
 
 ##  <a name="intro"></a>  1 Introduction
 
@@ -64,7 +56,7 @@ Matteo Aicardi
 | ------------------------------------- | ----------- | 
 | WASDI                                 | Web Advanced Space Developer Interface |
 | Workspace                             | Space on WASDI where a user can store and manipulate satellitar images|
-| Workflow                              | Series of operations applied to a image in order to process it into something else|
+| Workflow                              | XML file containing a series of operations applied to a image in order to process it into something else|
 | SAR                                   | Synthetic Aperture Radar|
 | S1                                    | Sentinel 1 Satellite |
 | OST                                   | Open Sar Toolkit |
@@ -152,7 +144,18 @@ Matteo Aicardi
     <p>
         Graphical representation of the system architecture.  
     <img src="imgs/System_Architecture.png" alt="System Architecture" style="float: left; margin-right: 10px;" />   
+    </p
+    <p>
+        The first Workflow contains these blocks/operations (image taken from SNAP)
+        </br>
+    <img src="imgs/Workflow1.PNG" alt="System Architecture" style="float: left; margin-right: 10px;" />
     </p>
+    <p>
+        The second Workflow contains these blocks/operations (image taken from SNAP)
+        </br>
+    <img src="imgs/Workflow2.PNG" alt="System Architecture" style="float: left; margin-right: 10px;" />
+    </p>
+        
 </details>
 
 ### <a name="interfaces"></a>  3.2 System Interfaces
@@ -170,9 +173,10 @@ Matteo Aicardi
             <li>DELETE ARD: true/false value that decides if the algorithm will delete all the middle products
        </ul>
        </br>
-       The Online UI will look like this: https://user-images.githubusercontent.com/93790615/200168934-33e9fe6f-8af9-4b58-8c4d-455f7130ebf2.png
+       The Online UI will look like this and it will aid with correctly filling the json 
+       <img src="imgs/OnlineGUI.PNG" alt="System Architecture" style="float: left; margin-right: 10px;" />
        </br>
-       and it will aid with correctly filling the json
+       
     </p>
 </details>
 
@@ -195,41 +199,4 @@ Matteo Aicardi
         </br>
         This image will be stored in the selected WASDI Workspace together with the original GRD images and all the midlle products if not deleted.
     </p>
-</details>
-
-## <a name="sys-module-1"></a>  4 System Module 1
-
-### <a name="sd"></a>  4.1 Structural Diagrams
-<details> 
-    <summary> Put a summary of the section
-    </summary>
-    <p>This sub section should describe ...</p>
-</details>
-
-#### <a name="cd"></a>  4.1.1 Class diagram
-<details> 
-    <summary> Put a summary of the section
-    </summary>
-    <p>This sub section should describe ...</p>
-</details>
-
-##### <a name="cd-description"></a>  4.1.1.1 Class Description
-<details> 
-    <summary> Put a summary of the section
-    </summary>
-    <p>This sub section should describe ...</p>
-</details>
-
-#### <a name="od"></a>  4.1.2 Object diagram
-<details> 
-    <summary> Put a summary of the section
-    </summary>
-    <p>This sub section should describe ...</p>
-</details>
-
-#### <a name="dm"></a>  4.2 Dynamic Models
-<details> 
-    <summary> Put a summary of the section
-    </summary>
-    <p>This sub section should describe ...</p>
 </details>
