@@ -190,12 +190,23 @@ class WeatherScraper():
             "./Prcp_" + district + "_" + xlsStartDate + "_" + xlsEndDate + "_past_" + str(daysBefore) + "_future_" + str(daysAfter) + ".xlsx",
             index=False)
 
-    def do_reverse(self,coordinate, attempt=1, max_attempts=5):
+    def do_reverse(self, coordinate, attempt=1, max_attempts=5):
+
+        """
+        Method used to try the reverse geocoding operation at most a number of times equal to max_attempts.
+        It will return the same object that the reverse method of the Nominatim API returns
+
+        :param self:
+        :param coordinate:
+        :param attempt:
+        :param max_attempts:
+        :return:
+        """
         try:
             return self.geolocator.reverse(coordinate)
         except GeocoderTimedOut:
             if attempt <= max_attempts:
-                return do_reverse(coordinate, attempt=attempt+1)
+                return self.do_reverse(coordinate, attempt=attempt + 1)
             raise
 
 
