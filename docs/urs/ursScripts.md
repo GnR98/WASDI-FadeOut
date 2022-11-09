@@ -137,8 +137,7 @@ This document introduces the Requirement Analysis in Software Engineering for th
 ### 2.1 Context and Motivation
 <a name="sp2.2"></a>
 WASDI operates in various fields including the development of an algorithm capable of recognizing if a water leak has happened near a pipe.
-To achieve that they need to train an AI with a correct dataset, part of this dataset is inside a database with coordinates of places where a leak
-has already occured and repaired. Correcting,improving and filtering the dataset are the objectives of the three classes described in the document.
+To achieve that they need to train a Machine Learning model with a correct dataset, part of this dataset is inside a database with coordinates of places where a leak has already occured and repaired. Correcting,improving and filtering the dataset are the objectives of the three classes described in the document.
 
 
 ### 2.2 Project Obectives 
