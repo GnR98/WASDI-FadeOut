@@ -96,6 +96,7 @@ The present document describe the functional and non-functional requirements of 
 			network.The algorithm inside the class needs a specific coordinate reference system and is able to change the one used in the pipe
 			network file to meet this constraint.
 		</p>
+</ul>
 
 <a name="sp1.1"></a>
 
