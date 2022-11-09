@@ -9,12 +9,12 @@ class CoordinatesChecker():
 
     def __init__(self):
 
-        #Sheet is the excel file that will be modified will be checked and eventually modified
-        self.sheet=None
-        #Initialising Nominatim API
+        # Sheet is the excel file that will be modified will be checked and eventually modified
+        self.sheet = None
+        # Initialising Nominatim API
         self.geolocator = Nominatim(user_agent="CoordCheck")
 
-    def Checker(self,loc):
+    def Checker(self, loc):
 
         """
         Main method of the class, it checks if the coordinates in the excel files are correct and if they are not
@@ -27,32 +27,37 @@ class CoordinatesChecker():
         if not os.path.exists(loc):
             raise ValueError(f"{loc} is not valid path")
 
-        #Read Excel file and for every row do a check in the ccordinates (i is the row number, row is the actual row)
+        # Read Excel file and for every row do a check in the ccordinates (i is the row number, row is the actual row)
         self.sheet = pd.read_excel(loc, na_values=['NA'])
-        
-         #invert the LAT and LNG column values ( they are wrong from raw data)
-        lng= self.sheet["COORD_Y SNAPSHOT GIS (LNG)"]
-        self.sheet["COORD_Y SNAPSHOT GIS (LNG)"]=self.sheet["COORD_X SNAPSHOT GIS (LAT)"]
-        self.sheet["COORD_X SNAPSHOT GIS (LAT)"]=lng
-        
+
+        # invert the LAT and LNG column values ( they are wrong from raw data)
+        lng = self.sheet["COORD_Y SNAPSHOT GIS (LNG)"]
+        self.sheet["COORD_Y SNAPSHOT GIS (LNG)"] = self.sheet["COORD_X SNAPSHOT GIS (LAT)"]
+        self.sheet["COORD_X SNAPSHOT GIS (LAT)"] = lng
+
         for i, row in self.sheet.iterrows():
 
-            if (not math.isnan(row["COORD_Y SNAPSHOT GIS (LNG)"]) and not math.isnan(row["COORD_X SNAPSHOT GIS (LAT)"])):
+            if (not math.isnan(row["COORD_X SNAPSHOT GIS (LAT)"]) and not math.isnan(
+                    row["COORD_Y SNAPSHOT GIS (LNG)"])):
 
-                #check the coordinates that the Nominatim API gives us with the current address
-                geolocation = self.do_reverse(str(row["COORD_Y SNAPSHOT GIS (LNG)"]) + "," + str(row["COORD_X SNAPSHOT GIS (LAT)"]))
+                # check the coordinates that the Nominatim API gives us with the current address
+                geolocation = self.do_reverse(
+                    str(row["COORD_X SNAPSHOT GIS (LAT)"]) + "," + str(row["COORD_Y SNAPSHOT GIS (LNG)"]))
 
-                #if the district is not the same as the one the API returns then the script corrects them with util
-                if ("city" in geolocation.raw["address"] and row["Comune"].upper() not in geolocation.raw["address"]["city"].upper()):
-                    self.util(i,row)
-                elif ("town" in geolocation.raw["address"] and row["Comune"].upper() not in geolocation.raw["address"]["town"].upper()):
-                    self.util(i,row)
-                elif ("village" in geolocation.raw["address"] and row["Comune"].upper() not in geolocation.raw["address"]["village"].upper()):
-                    self.util(i,row)
+                # if the district is not the same as the one the API returns then the script corrects them with util
+                if ("city" in geolocation.raw["address"] and row["Comune"].upper() not in geolocation.raw["address"][
+                    "city"].upper()):
+                    self.util(i, row)
+                elif ("town" in geolocation.raw["address"] and row["Comune"].upper() not in geolocation.raw["address"][
+                    "town"].upper()):
+                    self.util(i, row)
+                elif ("village" in geolocation.raw["address"] and row["Comune"].upper() not in
+                      geolocation.raw["address"]["village"].upper()):
+                    self.util(i, row)
 
         self.sheet.to_excel("NewGeolocation.xlsx", index=False);
 
-    def util(self,i,row):
+    def util(self, i, row):
 
         """
         Method used to correct the coordinates by using the do_geocode method and then substituting the newly obtained
@@ -63,22 +68,22 @@ class CoordinatesChecker():
         :return:
         """
 
-        comune=str(row["Comune"])
-        via=str(row["Indirizzo"])
-        civico=str(row["Civico"])
+        comune = str(row["Comune"])
+        via = str(row["Indirizzo"])
+        civico = str(row["Civico"])
 
-        #if the geocode operations does not fail the substitution occurs in the sheet
-        if (newgeo := self.do_geocode(comune + " " + via+" "+civico)) is not None:
-            self.sheet.at[i, "COORD_Y SNAPSHOT GIS (LNG)"] = newgeo.latitude
-            self.sheet.at[i, "COORD_X SNAPSHOT GIS (LAT)"] = newgeo.longitude
+        # if the geocode operations does not fail the substitution occurs in the sheet
+        if (newgeo := self.do_geocode(comune + " " + via + " " + civico)) is not None:
+            self.sheet.at[i, "COORD_Y SNAPSHOT GIS (LNG)"] = newgeo.longitude
+            self.sheet.at[i, "COORD_X SNAPSHOT GIS (LAT)"] = newgeo.latitude
         elif (newgeo := self.do_geocode(comune + " " + via)) is not None:
-            self.sheet.at[i, "COORD_Y SNAPSHOT GIS (LNG)"] = newgeo.latitude
-            self.sheet.at[i, "COORD_X SNAPSHOT GIS (LAT)"] = newgeo.longitude
-        elif (newgeo := self.do_geocode(comune+", ITALIA")) is not None:
-            self.sheet.at[i, "COORD_Y SNAPSHOT GIS (LNG)"] = newgeo.latitude
-            self.sheet.at[i, "COORD_X SNAPSHOT GIS (LAT)"] = newgeo.longitude
+            self.sheet.at[i, "COORD_Y SNAPSHOT GIS (LNG)"] = newgeo.longitude
+            self.sheet.at[i, "COORD_X SNAPSHOT GIS (LAT)"] = newgeo.latitude
+        elif (newgeo := self.do_geocode(comune + ", ITALIA")) is not None:
+            self.sheet.at[i, "COORD_Y SNAPSHOT GIS (LNG)"] = newgeo.longitude
+            self.sheet.at[i, "COORD_X SNAPSHOT GIS (LAT)"] = newgeo.latitude
 
-    def do_geocode(self,address, attempt=1, max_attempts=5):
+    def do_geocode(self, address, attempt=1, max_attempts=5):
 
         """
         Method used to try the geocode operation at most a number of times equal to max_attempts.
@@ -93,10 +98,10 @@ class CoordinatesChecker():
             return self.geolocator.geocode(address)
         except GeocoderTimedOut:
             if attempt <= max_attempts:
-                return self.do_geocode(address, attempt=attempt+1)
+                return self.do_geocode(address, attempt=attempt + 1)
             raise
 
-    def do_reverse(self,coordinate, attempt=1, max_attempts=5):
+    def do_reverse(self, coordinate, attempt=1, max_attempts=5):
 
         """
         Method used to try the reverse geocoding operation at most a number of times equal to max_attempts.
@@ -112,7 +117,7 @@ class CoordinatesChecker():
             return self.geolocator.reverse(coordinate)
         except GeocoderTimedOut:
             if attempt <= max_attempts:
-                return self.do_reverse(coordinate, attempt=attempt+1)
+                return self.do_reverse(coordinate, attempt=attempt + 1)
             raise
 
 
