@@ -39,6 +39,7 @@ Matteo Aicardi
     3. [System Data](#data)
         1. [System Inputs](#inputs)
         2. [System Outputs](#outputs)
+    4. [System Dynamic Diagram](#dynamic)
 
 ##  <a name="intro"></a>  1 Introduction
 
@@ -147,12 +148,12 @@ Matteo Aicardi
     <p>
         The first Workflow contains these blocks/operations (image taken from SNAP)
         </br>
-    <img src="imgs/Workflow1.PNG" alt="System Architecture" style="float: left; margin-right: 10px;" />
+    <img src="imgs/Workflow1.PNG" alt="Work1" style="float: left; margin-right: 10px;" />
     </p>
     <p>
         The second Workflow contains these blocks/operations (image taken from SNAP)
         </br>
-    <img src="imgs/Workflow2.PNG" alt="System Architecture" style="float: left; margin-right: 10px;" />
+    <img src="imgs/Workflow2.PNG" alt="Work2" style="float: left; margin-right: 10px;" />
     </p>
         
 </details>
@@ -161,8 +162,8 @@ Matteo Aicardi
 <details> 
     <summary> Put a summary of the section
     </summary>
-    <p>The System has two types of interfaces: online and offline. </br>
-       Both of them require that a json parameter file is created with the following parameters:
+    <p>The System has an online UI that can be accessed on WASDI. </br>
+       Similarly to when it is run offline a json parameter file with the following parameters is required:
        </br>
        <ul>
             <li>BBOX: A json structure divided into "northEast" and "southWest", in each subfield is specified both a latitude and a longitude. This defines                       the desired area
@@ -172,16 +173,15 @@ Matteo Aicardi
             <li>DELETE ARD: true/false value that decides if the algorithm will delete all the middle products
        </ul>
        </br>
-       The Online UI will look like this and it will aid with correctly filling the json 
-       <img src="imgs/OnlineGUI.PNG" alt="System Architecture" style="float: left; margin-right: 10px;" />
-       </br>
-       
+       The Online UI will look like this and it will help with correctly filling the json 
+       <img src="imgs/OnlineGUI.PNG" alt="OnlineGUI" style="float: left; margin-right: 10px;" />
+       </br>   
     </p>
 </details>
 
 ## <a name="data"></a>  3.3 System Data
 
-#### <a name="inputs"></a>  3.3.1 System Inputs
+### <a name="inputs"></a>  3.3.1 System Inputs
 <details>
     <summary> Input Details
     </summary>
@@ -190,7 +190,7 @@ Matteo Aicardi
     </p>
 </details>
 
-#### <a name="outputs"></a>  3.3.2 System Ouputs
+### <a name="outputs"></a>  3.3.2 System Ouputs
 <details> 
     <summary> Output Details
     </summary>
@@ -198,4 +198,11 @@ Matteo Aicardi
         </br>
         This image will be stored in the selected WASDI Workspace together with the original GRD images and all the midlle products if not deleted.
     </p>
+</details>
+
+## <a name="dynamic"></a>  3.4 System Dynamic Diagram
+<details> 
+    <summary> Diagram of online execution
+    </summary>
+    <img src="imgs/DynamicARD.png" alt="DynamicARD" style="float: left; margin-right: 10px;" />
 </details>
