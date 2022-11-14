@@ -4,5 +4,8 @@
 </br>
 
 ### In order to help we were given 2 tasks: the first is importing a new standard processing for satellite images on their platform and he second is correcting,filtering and improving the dataset that will be used to train the algorithm.
+</br>
+
+### Inside the docs folder you can find all the documentation that was produced during the collaboration, the src folder contains all the source code while in the tests one lie all the code regarding automated tests
 
 
