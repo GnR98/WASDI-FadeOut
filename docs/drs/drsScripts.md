@@ -234,7 +234,7 @@ Matteo Aicardi
 <details> 
     <summary> Diagram of how the system architecture composed by the three classes
     </summary>
-     <img src="imgs/ScriptSA.PNG" alt="ScriptSA" style="float: left; margin-right: 10px;" />
+     <img src="imgs/ScriptSA.png" alt="ScriptSA" style="float: left; margin-right: 10px;" />
 </details>
 
 ### <a name="interfaces"></a>  3.2 System Interfaces
