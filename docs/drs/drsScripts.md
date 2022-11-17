@@ -65,8 +65,7 @@ Matteo Aicardi
 1. [Introduction](#intro)
     1. [Purpose and Scope](#purpose)  
     2. [Definitions](#def)
-    3. [Document Overview](#overview)
-    4. [Bibliography](#biblio)
+    3. [Bibliography](#biblio)
 2. [Project Description](#description)
     1. [Project Introduction](#project-intro)
     2. [Technologies used](#tech)
@@ -219,51 +218,126 @@ Matteo Aicardi
       The user must be able to connect to Internet
     </p>
     <p>
-      For the correction algorithm the only row values that may be oncorrect are the ones regarding the latitude/longitude and the date on which the repairings were finished
+      For the correction algorithm the only row values that may be incorrect are the ones regarding the latitude/longitude and the date on which the repairings were finished
     </p>
+    <p>
+      For the correction algorithm if in a row the coordinates are not correct and the address contains only the city, the algorithm will assume that the city is in Italy
+    </p>
+    
   
 </details>
 
 ## <a name="system-overview"></a>  3 System Overview
-<details> 
-    <summary> Put a summary of the section
-    </summary>
-    <p>This sub section should describe ...</p>
-</details>
+
 
 ### <a name="architecture"></a>  3.1 System Architecture
 <details> 
-    <summary> Put a summary of the section
+    <summary> Diagram of how the system architecture composed by the three classes
     </summary>
-    <p>This sub section should describe ...</p>
+     <img src="imgs/ScriptSA.PNG" alt="ScriptSA" style="float: left; margin-right: 10px;" />
 </details>
 
 ### <a name="interfaces"></a>  3.2 System Interfaces
+<p>These classes do not have a real UI and are mostly executed via terminal.
+</br>
+</br>
+Each class, if launched as a standalone program, supports typing manually the inputs instead of creating a json file
+</p>
+
+
+## <a name="data"></a>  3.3 System Data
+
+
+### <a name="inputs"></a>  3.3.1 System Inputs
 <details> 
-    <summary> Put a summary of the section
+    <summary> Details of the inputs for each class
     </summary>
-    <p>This sub section should describe ...</p>
+    <p>
+	</br>
+	CoordinateChecker:
+	    <ul>
+		    <li>The location of the Excel database
+	</ul>
+    </p>
+    <p>
+	WeatherScraper (each parameter can also be specified in a json file):
+	<ul>
+		<li>The location of the Excel database     (EXCELLOC)
+		<li>The number of days before the repair date on which you want to fecth weather data    (DAYSBEFORE)
+		<li>The number of days after the repair date on which you want to fecth weather data    (DAYSAFTER)
+		<li>The district of which it is desired to obtain weather data    (DISTRICT)
+	</ul>
+    </p>
+    <p>
+	ShapeFileProjection (each parameter can also be specified in a json file):
+	<ul>
+		<li>The location of the Excel database     (EXCELLOC)
+		<li>The location of the Shapefile    (SHAPELOC)
+		<li>The district of which it is desired to obtain projected coordinates for each row     (DISTRICT)
+	</ul>
+   </p>
 </details>
 
-### <a name="data"></a>  3.3 System Data
+### <a name="outputs"></a>  3.3.2 System Ouputs
 <details> 
-    <summary> Put a summary of the section
+    <summary> Details of the output for each class
     </summary>
-    <p>This sub section should describe ...</p>
-</details>
-
-#### <a name="inputs"></a>  3.3.1 System Inputs
-<details> 
-    <summary> Put a summary of the section
-    </summary>
-    <p>This sub section should describe ...</p>
-</details>
-
-#### <a name="outputs"></a>  3.3.2 System Ouputs
-<details> 
-    <summary> Put a summary of the section
-    </summary>
-    <p>This sub section should describe ...</p>
+     <p>
+	</br>
+	CoordinateChecker:
+	    <ul>
+	            A new Excel file with the same columns as the original
+            </ul>
+     </p>
+     <p>
+	WeatherScraper:
+	<ul>
+		<p>
+		A new Excel file with the following columns (format of column_name:: explanation)
+		</p>
+		<li>Comune::  Same as in the original Excel   
+		<li>Data Inizio Esito::  Same as in the original Excel
+		<li>COORD_X SNAPSHOT GIS (LAT)::  Same as in the original Excel
+		<li>COORD_Y SNAPSHOT GIS (LNG)::  Same as in the original Excel
+		<li>Precipitations (in mm), from <DAYSBEFORE> days before (in ascending order of date):: Real number array containing weather data in the days before the repair (including that day), can contain nan values
+		<li>Precipitations (in mm), until <DAYSAFTER> days after (in ascending order of date)::  Real number array weather data in the days after the repair (including that day), can contain nan values
+		<li>Mean precipitation value in the <DAYSBEFORE> days before the repair date (in mm):: Mean value calculated without considering nan values, can be nan if all the values in the precipitation cell are nan
+		<li>Mean precipitation value in the <DAYSAFTER> days after the repair date (in mm):: Mean value calculated without considering nan values, can be nan if all the values in the precipitation cell are nan
+		<li>Type of location:: A string that may be "city","town" or "village" depending to which the location belongs
+		<li>Name of location:: A string containing the name of the location (may be different from the district)
+		<li>Did it rain before the repair date ?:: Boolean value indicating if it has rained before the repair, can be nan if all the values in the precipitation cell are nan
+		<li>Did it rain after the repair date ?:: Boolean value indicating if it has rained after the repair, can be nan if all the values in the precipitation cell are nan
+	</ul>
+    </p>
+    <p>
+	ShapeFileProjection:
+	<ul>
+		<p>
+		Shapefile conversion:
+		</p>
+		<li>Changes the origial shapefile coordinate reference system without creating a new one
+	</ul>
+			</br>
+	<ul>
+		<p>
+			Shapefile projection:
+		</p>
+		<p>
+		        Creates a new Excel file with the following columns (format of column_name:: explanation)
+		</p>
+		<li>Intervento:: Same as in the original Excel
+		<li>Comune:: Same as in the original Excel	
+		<li>Indirizzo:: Same as in the original Excel
+		<li>Civico:: Same as in the original Excel
+		<li>Note Esecutore:: Same as the original
+		<li>Data Inizio Esito:: Same as in the original Excel
+		<li>Data fine:: Same as in the original Excel
+		<li>ID SNAPSHOT:: Same as in the original Excel
+		<li>COORD_X SNAPSHOT GIS (LAT):: Latitude of the projected point on the shapefile (closest point on the same address)
+		<li>COORD_Y SNAPSHOT GIS (LNG):: Longitude of the projected point on the shapefile (closest point on the same address)
+		<li>COORDINATE RISULTANTI:: Same as in the original Excel
+	</ul>			
+    </p>
 </details>
 
 ## <a name="sys-module-1"></a>  4 System Module 1
