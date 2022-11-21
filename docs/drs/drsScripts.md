@@ -342,9 +342,26 @@ Each class, if launched as a standalone program, supports typing manually the in
 
 ## <a name="sys-module-1"></a>  4 System Module 1
 <details> 
-    <summary> Put a summary of the section
+    <summary> CoordinateChecker summary
     </summary>
-    <p>This sub section should describe ...</p>
+    <p>This class is used to fix all the possible error inside the excel Coordinate file in input, such as LNG and LAT columns inverted 
+    and inconsistent coordinate values respect them street name </p>
+</details>
+<details>
+    <summary> WeatherScraper summary
+    </summary>
+    <p> This class fetch data about precipitations in a set of given places and dates. Taking into account the chosen place and the date ranges
+ 	it fecthes the precipitation data for every day between (reparation date-daysBefore) and (reparation date+daysAfter). 
+	Additional information are added such as the mean value for the past and future days, a boolean variable that tells whether it has rained or not before or 	   after the reparation date, and the type of place (city,town,village). A new excel file will be created with all the relevant columns
+   </p>
+</details>
+<details>
+    <summary> ShapefileProjection summary
+    </summary>
+    <p> This class calculates all the projections on the main pipes of the works performed, it also has a functionality 
+    to fix problems inside the shapefile in input such as different coordinate reference system (converted into epsg-4326) and wrong
+    addresses with respect to coordinates.
+   </p>
 </details>
 
 ### <a name="sd"></a>  4.1 Structural Diagrams
