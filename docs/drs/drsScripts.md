@@ -376,16 +376,11 @@ Each class, if launched as a standalone program, supports typing manually the in
     <summary> Put a summary of the section
     </summary>
     <p>This sub section should describe ...</p>
+    <img src="imgs/ScriptsUML.png" alt="ScriptsUML" style="float: left; margin-right: 10px;" />
+
 </details>
 
 ##### <a name="cd-description"></a>  4.1.1.1 Class Description
-<details> 
-    <summary> Put a summary of the section
-    </summary>
-    <p>This sub section should describe ...</p>
-</details>
-
-#### <a name="od"></a>  4.1.2 Object diagram
 <details> 
     <summary> Put a summary of the section
     </summary>
