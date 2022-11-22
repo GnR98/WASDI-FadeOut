@@ -413,7 +413,6 @@ Each class, if launched as a standalone program, supports typing manually the in
     <p>Methods:</p>
 	<ul>
 		<li> WeatherStat : main method of the class, it calculates values and mean values of precipitations, if there were or not any precipitations and the 					location type, given a range date and a specific district present on the excel file in input.
-
 		<li> do_reverse : given a coordinate (refering to the WGS84 coordinate system) this method will return the respective address,
 			  	  recursive method that will try to get the result in a max of "max_attempts" retry.
 	</ul>
