@@ -394,7 +394,23 @@ Each class, if launched as a standalone program, supports typing manually the in
 
 #### <a name="dm"></a>  4.2 Dynamic Models
 <details> 
-    <summary> Put a summary of the section
+    <summary> CoordinateChecker Dynamic Model
     </summary>
     <p>This sub section should describe ...</p>
+    <img src="imgs/DynamicsCoordinatesChecker.png" alt="DynamicsCoordinatesChecker" style="float: left; margin-right: 10px;" />
 </details>
+<details> 
+    <summary> WeatherScraper Dynamic Model
+    </summary>
+    <p>This sub section should describe ...</p>
+    <img src="imgs/DynamicWeatherScraper.png" alt="DynamicWeatherScraper" style="float: left; margin-right: 10px;" />
+
+</details>
+<details> 
+    <summary> ShapefileProjection Dynamic Model
+    </summary>
+    <p>This sub section should describe ...</p>
+    <img src="imgs/DynamicShapeFileProjection.png" alt="DynamicShapeFileProjection" style="float: left; margin-right: 10px;" />
+
+</details>
+
