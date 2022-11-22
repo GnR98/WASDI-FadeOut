@@ -382,9 +382,63 @@ Each class, if launched as a standalone program, supports typing manually the in
 
 ##### <a name="cd-description"></a>  4.1.1.1 Class Description
 <details> 
-    <summary> Put a summary of the section
+    <summary> CoordinateChecker Class description
     </summary>
-    <p>This sub section should describe ...</p>
+    <p>Attributes:</p>
+	<ul>
+		<li> sheet : excel file in input.
+		<li> geolocator : object instance from the geopy library, used to convert the coordinate into address and viceversa.
+	</ul>
+    <p>Methods:</p>
+	<ul>
+		<li> Checker : main method of the class, it checks if the coordinates in the excel files are correct and if they are not,
+        		      corrects them. A new file NewGeolocation.xlsx will be created in the project folder.
+		<li> util :  method used to correct the coordinates by using the do_geocode method and then substituting the newly obtained
+        		    coordinates in the i-th row.
+		<li> do_geocode : given an address this method will return the respective coordinate (refering to the WGS84 coordinate system),
+			  	  recursive method that will try to get the result in a max of "max_attempts" retry.
+		<li> do_reverse : given a coordinate (refering to the WGS84 coordinate system) this method will return the respective address,
+			  	  recursive method that will try to get the result in a max of "max_attempts" retry.
+	</ul>
+			
+</details>
+<details> 
+    <summary> WeatherScraper Class description
+    </summary>
+    <p>Attributes:</p>
+	<ul>
+		<li> sheet : excel file in input.
+		<li> geolocator : object instance from the geopy library, used to convert the coordinate into address and viceversa.
+	</ul>
+    <p>Methods:</p>
+	<ul>
+		<li> WeatherStat : main method of the class, it calculates values and mean values of precipitations, if there were or not any precipitations and the 					location type, given a range date and a specific district present on the excel file in input.
+
+		<li> do_reverse : given a coordinate (refering to the WGS84 coordinate system) this method will return the respective address,
+			  	  recursive method that will try to get the result in a max of "max_attempts" retry.
+	</ul>
+			
+</details>
+<details> 
+    <summary> ShapeFileProjection Class description
+    </summary>
+    <p>Attributes:</p>
+	<ul>
+		<li> sheet : excel file in input.
+		<li> geod:  object instance from the pyproj library, used to calculate distance between line and point.
+		<li> geolocator : object instance from the geopy library, used to convert the coordinate into address and viceversa.
+		<li> dict: dictionary used to contains all the new projected coordinates calculated from the shapefile and the excel file.
+	</ul>
+    <p>Methods:</p>
+	<ul>
+		<li> getAllProjections : create a new Excel file with all the columns inside NewGeolocation plus two more 
+		                         containing the coordinates of the projected points.
+		<li> projectOnClosestPipe :  method used to calculate the nearest point to the working point belonging to the main line. 
+		<li> convertShapefile :  convert and substitute the coordinates in the selected shapefile from EPSG 32632 to WGS84.
+		<li> do_reverse : given a coordinate (refering to the WGS84 coordinate system) this method will return the respective address,
+			  	  recursive method that will try to get the result in a max of "max_attempts" retry.
+	</ul>
+			
 </details>
 
 #### <a name="dm"></a>  4.2 Dynamic Models
