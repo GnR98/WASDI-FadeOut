@@ -186,7 +186,7 @@ Matteo Aicardi
     <summary> Input Details
     </summary>
     <p>
-        The system takes in input a json parameters file as described in the former section and a config json file required to work with WASDI
+        The system takes in input a json parameters file as described in the section 3.2 and a config json file required to work with WASDI
     </p>
 </details>
 
