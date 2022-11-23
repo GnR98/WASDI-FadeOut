@@ -66,6 +66,7 @@ This document introduces the Requirement Analysis in Software Engineering for th
 | ARD                                   | Analysis Ready Data |
 | OST                                    | Open Sar Toolkit |
 | WASDI                                   | Web Advanced Space Developer Interface |
+| SNAP                                    | Software specialized in visualizing and processing satellite images |
 
 
 <a name="sp1.3"></a>
@@ -122,5 +123,5 @@ FadeOut Software
  
 | ID | Descrizione | Priorità |
 | --------------- | ----------- | ---------- | 
-| 1.0 |The output of the systems shall be correctly visualized on WASDI |M|
+| 1.0 |The output of the systems shall be correctly visualized on SNAP |M|
 | 2.0 |The algorithm must be provided as a WASDI processor |M|
