@@ -57,7 +57,10 @@ Matteo Aicardi
 | 1.2 | 14/10/2022 |M. Aicardi, R. Gnisci | Third ShapeFileProjection update |
 | 1.3 | 18/10/2022 |M. Aicardi, R. Gnisci | Fourth ShapeFileProjection update |
 | 1.4 | 20/10/2022 |M. Aicardi, R. Gnisci | Fifth ShapeFileProjection update |
-| 1.5 | 25/10/2022 |M. Aicardi, R. Gnisci | Final ShapeFileProjection update |
+| 1.5 | 25/10/2022 |M. Aicardi, R. Gnisci | Sixth ShapeFileProjection update |
+| 1.6 | 3/11/2022 |M. Aicardi, R. Gnisci | Seventh ShapeFileProjection update |
+| 1.7 | 7/11/2022 |M. Aicardi, R. Gnisci | Eighth ShapeFileProjection update |
+| 1.8 | 14/11/2022 |M. Aicardi, R. Gnisci | Final ShapeFileProjection update |
 
 
 ## Table of Content
@@ -80,10 +83,8 @@ Matteo Aicardi
     1. [Structural Diagrams](#sd)
         1. [Class Diagram](#cd)
             1. [Class Description](#cd-description)
-        2. [Object Diagram](#od)
-        3. [Dynamic Models](#dm)
-5. [System Module 2](#sys-module-2)
-   1. ...
+        2. [Dynamic Models](#dm)
+
 
 ##  <a name="intro"></a>  1 Introduction
 
@@ -315,7 +316,7 @@ Each class, if launched as a standalone program, supports typing manually the in
 		<p>
 		Shapefile conversion:
 		</p>
-		<li>Changes the origial shapefile coordinate reference system without creating a new one
+		<li>Changes the origial shapefile coordinate reference system without creating a new file
 	</ul>
 			</br>
 	<ul>
@@ -365,17 +366,11 @@ Each class, if launched as a standalone program, supports typing manually the in
 </details>
 
 ### <a name="sd"></a>  4.1 Structural Diagrams
-<details> 
-    <summary> Put a summary of the section
-    </summary>
-    <p>This sub section should describe ...</p>
-</details>
 
 #### <a name="cd"></a>  4.1.1 Class diagram
 <details> 
-    <summary> Put a summary of the section
+    <summary> Class diagram for all the classes 
     </summary>
-    <p>This sub section should describe ...</p>
     <img src="imgs/ScriptsUML.png" alt="ScriptsUML" style="float: left; margin-right: 10px;" />
 
 </details>
@@ -444,20 +439,17 @@ Each class, if launched as a standalone program, supports typing manually the in
 <details> 
     <summary> CoordinateChecker Dynamic Model
     </summary>
-    <p>This sub section should describe ...</p>
     <img src="imgs/DynamicsCoordinatesChecker.png" alt="DynamicsCoordinatesChecker" style="float: left; margin-right: 10px;" />
 </details>
 <details> 
     <summary> WeatherScraper Dynamic Model
     </summary>
-    <p>This sub section should describe ...</p>
     <img src="imgs/DynamicWeatherScraper.png" alt="DynamicWeatherScraper" style="float: left; margin-right: 10px;" />
 
 </details>
 <details> 
     <summary> ShapefileProjection Dynamic Model
     </summary>
-    <p>This sub section should describe ...</p>
     <img src="imgs/DynamicShapeFileProjection.png" alt="DynamicShapeFileProjection" style="float: left; margin-right: 10px;" />
 
 </details>
