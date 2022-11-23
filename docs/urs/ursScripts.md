@@ -57,7 +57,10 @@ Matteo Aicardi
 | 1.2 | 14/10/2022 |M. Aicardi, R. Gnisci | Third ShapeFileProjection update |
 | 1.3 | 18/10/2022 |M. Aicardi, R. Gnisci | Fourth ShapeFileProjection update |
 | 1.4 | 20/10/2022 |M. Aicardi, R. Gnisci | Fifth ShapeFileProjection update |
-| 1.5 | 25/10/2022 |M. Aicardi, R. Gnisci | Final ShapeFileProjection update |
+| 1.5 | 25/10/2022 |M. Aicardi, R. Gnisci | Sixth ShapeFileProjection update |
+| 1.6 | 3/11/2022 |M. Aicardi, R. Gnisci | Seventh ShapeFileProjection update |
+| 1.7 | 7/11/2022 |M. Aicardi, R. Gnisci | Eighth ShapeFileProjection update |
+| 1.8 | 14/11/2022 |M. Aicardi, R. Gnisci | Final ShapeFileProjection update |
 
 # Table of Contents
 
