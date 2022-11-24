@@ -117,8 +117,8 @@ class TestCoordinateChecker(unittest.TestCase):
     ############################ TEST util ############################
 
     def test_util_full(self):
-        loctest = "CoordinateCheckerTests/Sheets/TestSheet_util.xlsx"
-        locres = "CoordinateCheckerTests/Sheets/TestSheet_util_result.xlsx"
+        loctest = "Sheets/TestSheet_util.xlsx"
+        locres = "Sheets/TestSheet_util_result.xlsx"
         testsheet = CoordinateChecker.pd.read_excel(loctest, na_values=['NA'])
         ressheet = CoordinateChecker.pd.read_excel(locres, na_values=['NA'])
         self.CC.sheet=testsheet
@@ -130,9 +130,9 @@ class TestCoordinateChecker(unittest.TestCase):
     ############################ TEST checker ############################
 
     def test_checker(self):
-        loctest = "CoordinateCheckerTests/Sheets/TestSheet_checker.xlsx"
+        loctest = "Sheets/TestSheet_checker.xlsx"
         self.CC.Checker(loctest)
-        locres = "CoordinateCheckerTests/Sheets/TestSheet_checker_res.xlsx"
+        locres = "Sheets/TestSheet_checker_res.xlsx"
         ressheet = CoordinateChecker.pd.read_excel(locres, na_values=['NA'])
         newgeoloc = "NewGeolocation.xlsx"
         newgeosheet = CoordinateChecker.pd.read_excel(newgeoloc, na_values=['NA'])
