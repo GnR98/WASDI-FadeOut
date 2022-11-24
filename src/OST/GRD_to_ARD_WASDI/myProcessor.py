@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from pprint import pprint
 # 10 km buffer around AOI Point
+import numpy as np
 import wasdi
 # we will need this for our time of period definition
 from datetime import datetime, timedelta
@@ -104,7 +105,7 @@ def run():
 
     #Use the new array as input to create a mosaic
     sMosaicImgName = "mosaicImg_"+sStartDate+"_"+str(fLatN)+"-"+str(fLonE)+"-"+str(fLatS)+"-"+str(fLonW)+".vrt"
-    wasdi.mosaic(asMosaicImages, sMosaicImgName,iNoDataValue=0)
+    wasdi.mosaic(asMosaicImages, sMosaicImgName,iNoDataValue=-1,iIgnoreInputValue=0)
 
     #Create a subset of the newly obtained mosaic
     SubsetImg = ["subset_"+sStartDate+"_"+str(fLatN)+"-"+str(fLonE)+"-"+str(fLatS)+"-"+str(fLonW)+".tif"]
